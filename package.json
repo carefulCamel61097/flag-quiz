@@ -1,0 +1,14 @@
+{
+  "name": "flag-quiz",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Programmatically generated flag quizzes (colour pie charts, inverted flags, zoomed crops).",
+  "type": "module",
+  "scripts": {
+    "build:flags": "node scripts/build-flags.mjs"
+  },
+  "devDependencies": {
+    "flag-icons": "7.5.0",
+    "world-countries": "5.1.0"
+  }
+}
