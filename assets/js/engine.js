@@ -70,6 +70,7 @@ export class Round {
     this.results = [];
     this.streak = 0;
     this.bestStreak = 0;
+    this.shownAt = performance.now();
   }
 
   get question() {
@@ -88,13 +89,28 @@ export class Round {
     return this.results.length === this.questions.length;
   }
 
-  answer(country) {
+  /**
+   * `chosen` is the country the player named, or null if they gave up or typed
+   * something unrecognisable. `correct` is passed in because free-text answers
+   * are graded by the matcher, which knows about spelling; multiple choice can
+   * just compare codes.
+   */
+  answer(chosen, { correct = chosen?.code === this.question.answer.code, typed = null } = {}) {
     const question = this.question;
-    const correct = country.code === question.answer.code;
 
     this.streak = correct ? this.streak + 1 : 0;
     this.bestStreak = Math.max(this.bestStreak, this.streak);
-    this.results.push({ question, chosen: country, correct });
+
+    // Time to answer is recorded from the moment the flag appeared. Nothing
+    // consumes it yet; it is the raw material for measuring real difficulty
+    // per flag per mode, rather than guessing at labels.
+    this.results.push({
+      question,
+      chosen,
+      typed,
+      correct,
+      elapsedMs: Math.round(performance.now() - this.shownAt),
+    });
 
     return { correct, answer: question.answer };
   }
@@ -102,6 +118,7 @@ export class Round {
   advance() {
     if (this.current < this.questions.length - 1) {
       this.current += 1;
+      this.shownAt = performance.now();
       return true;
     }
     return false;
@@ -115,6 +132,6 @@ export function verdictFor(correct, total) {
   if (share >= 0.8) return 'Strong round.';
   if (share >= 0.6) return 'Solid. A few got away.';
   if (share >= 0.4) return 'Halfway there.';
-  if (share > 0) return 'Rough one. They look different upside down.';
-  return 'Nothing landed. Inverted flags are genuinely hard.';
+  if (share > 0) return 'Rough one. A few to go back over.';
+  return 'Nothing landed that time.';
 }

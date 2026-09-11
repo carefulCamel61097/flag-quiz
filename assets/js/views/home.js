@@ -5,47 +5,62 @@
 import { CATEGORIES, MODES, modesInCategory, liveModes } from '../registry.js';
 import { loadCountries, flagUrl } from '../data.js';
 
-const PREVIEW_CODES = ['br', 'jp', 'za', 'in', 'ca', 'gr', 'ke', 'kr', 'mx', 'se'];
+const FALLBACK_PREVIEW = 'br';
 
 function modeCard(mode) {
-  const live = mode.status === 'live';
-  const tag = live
-    ? '<span class="tag tag--live">Playable</span>'
-    : '<span class="tag tag--soon">Soon</span>';
-
-  const preview = mode.filter
-    ? `<div class="card__preview" style="--mode-filter:${mode.filter}"><img alt="" aria-hidden="true" data-preview></div>`
-    : '<div class="card__preview card__preview--empty" aria-hidden="true"><span>?</span></div>';
-
-  const inner = `
-    ${preview}
-    <div class="card__body">
-      <div class="card__head">
-        <h3 class="card__title">${mode.name}</h3>
-        ${tag}
-      </div>
-      <p class="card__blurb">${mode.blurb}</p>
-      <p class="card__meta">${mode.difficulty}</p>
+  const preview = `<div class="card__preview" style="--mode-filter:${mode.filter ?? 'none'}">
+      <img alt="" aria-hidden="true" data-preview="${mode.preview ?? FALLBACK_PREVIEW}">
     </div>`;
 
-  return live
-    ? `<a class="card card--live" href="#/play/${mode.id}">${inner}</a>`
-    : `<div class="card card--soon" aria-disabled="true">${inner}</div>`;
+  return `
+    <a class="card" href="#/play/${mode.id}">
+      ${preview}
+      <div class="card__body">
+        <h3 class="card__title">${mode.name}</h3>
+        <p class="card__blurb">${mode.blurb}</p>
+      </div>
+    </a>`;
+}
+
+/**
+ * Unbuilt modes are listed as compact rows, not as cards.
+ *
+ * Giving them the same card as a playable mode filled the page with empty
+ * placeholder tiles, so the site read as broken rather than as one with a
+ * roadmap. A dense list says "planned" without competing for attention.
+ */
+function upcomingRow(mode) {
+  return `
+    <li class="upcoming__item">
+      <span class="upcoming__name">${mode.name}</span>
+      <span class="upcoming__blurb">${mode.blurb}</span>
+    </li>`;
 }
 
 function categorySection(category) {
   const modes = modesInCategory(category.id);
   if (!modes.length) return '';
-  const playable = modes.filter((m) => m.status === 'live').length;
+
+  const live = modes.filter((m) => m.status === 'live');
+  const soon = modes.filter((m) => m.status !== 'live');
 
   return `
     <section class="category" id="${category.id}">
       <div class="category__head">
         <h2 class="category__title">${category.name}</h2>
         <p class="category__tagline">${category.tagline}</p>
-        <p class="category__count">${playable} of ${modes.length} playable</p>
       </div>
-      <div class="grid">${modes.map(modeCard).join('')}</div>
+
+      ${live.length ? `<div class="grid">${live.map(modeCard).join('')}</div>` : ''}
+
+      ${
+        soon.length
+          ? `<div class="upcoming">
+               <h3 class="upcoming__title">Planned</h3>
+               <ul class="upcoming__list">${soon.map(upcomingRow).join('')}</ul>
+             </div>`
+          : ''
+      }
     </section>`;
 }
 
@@ -87,8 +102,8 @@ async function fillPreviews(root) {
   const countries = await loadCountries();
   const byCode = new Map(countries.map((c) => [c.code, c]));
 
-  slots.forEach((img, i) => {
-    const country = byCode.get(PREVIEW_CODES[i % PREVIEW_CODES.length]);
+  for (const img of slots) {
+    const country = byCode.get(img.dataset.preview);
     if (country) img.src = flagUrl(country);
-  });
+  }
 }

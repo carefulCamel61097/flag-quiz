@@ -10,8 +10,9 @@ name the country.
 Because every game mode is just a transform over the same 250 SVGs, adding a
 new mode costs one function, not 250 pieces of content.
 
-Status: **playable** — the site is live with the first mode (Inverted). The
-other nineteen are listed in the app as Soon. See [Roadmap](#roadmap).
+Status: **playable** — two modes are live (Classic and Inverted), with free-text
+or multiple-choice answers. The other nineteen are listed as planned. See
+[Roadmap](#roadmap).
 
 ## Game modes
 
@@ -24,12 +25,13 @@ crop pipelines already exist.
 
 | # | Mode | What the player sees | Appeal | Effort |
 | --- | --- | --- | --- | --- |
-| 1 | **Inverted** | The flag with RGB values inverted. Red becomes cyan, white becomes black. Surprisingly hard, and instantly recognisable once it clicks. | High | Trivial — one canvas pass or a CSS filter, nothing precomputed |
-| 2 | **Zoomed** | A small crop blown up. The classic format, and the most immediately understandable. | High | Medium — needs the crop pipeline below |
-| 3 | **Colour pie** | A pie chart of the flag's colours, sized by how much of the flag each covers. No shapes, no layout — just the palette and its proportions. | High | Medium — needs the colour pipeline below |
-| 4 | **Low-res mosaic** | The flag downsampled to an N×M block grid. Difficulty is a single integer, which makes this the cleanest difficulty dial in the set and a natural progressive-reveal mode. | High | Low |
-| 5 | **Blur reveal** | Starts heavily blurred and sharpens on a timer. Points decay as it gets easier. | High | Low |
-| 6 | **Real or fake?** | A flag with one property subtly altered — stripe order swapped, a colour shifted 15° in hue, a star miscounted, band widths changed. Real or fake? | High | Low–medium |
+| 1 | **Classic** | The flag, untouched. The quiz everyone expects to find, and the baseline every other mode is measured against. | High | Trivial |
+| 2 | **Inverted** | The flag with RGB values inverted. Red becomes cyan, white becomes black. Surprisingly hard, and instantly recognisable once it clicks. | High | Trivial — one canvas pass or a CSS filter, nothing precomputed |
+| 3 | **Zoomed** | A small crop blown up. The classic format, and the most immediately understandable. | High | Medium — needs the crop pipeline below |
+| 4 | **Colour pie** | A pie chart of the flag's colours, sized by how much of the flag each covers. No shapes, no layout — just the palette and its proportions. | High | Medium — needs the colour pipeline below |
+| 5 | **Low-res mosaic** | The flag downsampled to an N×M block grid. Difficulty is a single integer, which makes this the cleanest difficulty dial in the set and a natural progressive-reveal mode. | High | Low |
+| 6 | **Blur reveal** | Starts heavily blurred and sharpens on a timer. Points decay as it gets easier. | High | Low |
+| 7 | **Real or fake?** | A flag with one property subtly altered — stripe order swapped, a colour shifted 15° in hue, a star miscounted, band widths changed. Real or fake? | High | Low–medium |
 
 Real or fake is the sleeper pick. It is endlessly generative from 250 source
 flags, and it tests something no other mode does: precision of memory rather
@@ -40,12 +42,12 @@ headline feature.
 
 | # | Mode | What the player sees | Appeal | Effort |
 | --- | --- | --- | --- | --- |
-| 7 | **Greyscale** | Layout intact, colour gone. Separates the flags you know by shape from the ones you know by colour. | Medium | Trivial |
-| 8 | **Twin flags** | Chad and Romania side by side, or Indonesia and Monaco. Which is which? | Medium–high | Low, once palette-collision data exists |
-| 9 | **Silhouette** | The emblem only, flattened to one colour on a plain field. Brutal, and great for the flags with coats of arms. | Medium | Medium — needs emblem isolation |
-| 10 | **Scrambled** | The flag cut into a grid and shuffled. | Medium | Low |
-| 11 | **Palette bar** | The colour-pie data as a stacked bar, which hides the "which slice is biggest" tell a pie gives away. | Medium | Trivial, once the pie exists |
-| 12 | **Polar** | The flag remapped into polar coordinates so it becomes a disc. Horizontal tricolours turn into concentric rings, vertical ones into wedges. Visually striking and it defamiliarises flags you would otherwise know instantly. | Medium | Low — about ten lines of canvas maths |
+| 8 | **Greyscale** | Layout intact, colour gone. Separates the flags you know by shape from the ones you know by colour. | Medium | Trivial |
+| 9 | **Twin flags** | Chad and Romania side by side, or Indonesia and Monaco. Which is which? | Medium–high | Low, once palette-collision data exists |
+| 10 | **Silhouette** | The emblem only, flattened to one colour on a plain field. Brutal, and great for the flags with coats of arms. | Medium | Medium — needs emblem isolation |
+| 11 | **Scrambled** | The flag cut into a grid and shuffled. | Medium | Low |
+| 12 | **Palette bar** | The colour-pie data as a stacked bar, which hides the "which slice is biggest" tell a pie gives away. | Medium | Trivial, once the pie exists |
+| 13 | **Polar** | The flag remapped into polar coordinates so it becomes a disc. Horizontal tricolours turn into concentric rings, vertical ones into wedges. Visually striking and it defamiliarises flags you would otherwise know instantly. | Medium | Low — about ten lines of canvas maths |
 
 ### Long tail and variations
 
@@ -211,10 +213,20 @@ a rotated sampling grid. Rotation is especially valuable against horizontal
 tricolours, where an axis-aligned crop is often a flat band of one colour but
 an angled one cuts across a boundary and carries real information.
 
-## Difficulty can be computed too
+## Difficulty
 
-Most of what makes a flag easy or hard is measurable from the same data, so
-difficulty tiers need not be hand-assigned:
+There are no difficulty labels in the app. There were briefly — Easy, Medium,
+Hard, Varies — and they were invented. Nobody had played the quizzes, so the
+labels were guesses dressed up as information, and a wrong label is worse than
+no label: it tells players a mode is beneath them, or scares them off one they
+would have enjoyed.
+
+Two honest sources of difficulty exist. One can be computed today. The other
+has to be earned from real play.
+
+### What can be computed
+
+Most of what makes a flag easy or hard is measurable from the flag itself:
 
 - **Colour count and entropy** — a three-colour tricolour carries far less
   information than a flag with a coat of arms.
@@ -227,6 +239,49 @@ difficulty tiers need not be hand-assigned:
 The same collision data gives good distractors: in multiple choice, offering
 the three flags with the most similar palettes is much harder than offering
 three at random.
+
+### What has to be measured
+
+Computed difficulty only ever describes the image. It cannot know that people
+confuse Chad with Romania but never with Yemen, or that an inverted Japan is
+trivial while an inverted Ireland is not. That lives in what players actually
+do.
+
+Worth recording, once there is somewhere to put it:
+
+| Field | Why |
+| --- | --- |
+| mode, flag code | The unit that matters is the **pair**, not the mode. "Zoomed" has no single difficulty; "Zoomed, Peru, crop 14" does. |
+| correct | The raw signal. |
+| time to answer | Separates *hard* from *unknown*. A slow correct answer and a fast wrong one are different states. |
+| answer method | Typed answers are strictly harder than multiple choice, so the two cannot share a difficulty scale. |
+| what was chosen or typed | The most valuable field, and the least obvious. |
+
+The engine already timestamps every answer (`elapsedMs` on each result), so
+the per-question timing exists in memory today. Nothing consumes it yet.
+
+**Item difficulty, not just mode difficulty.** The interesting unit is one
+flag inside one mode, sometimes one *crop* inside one mode. Aggregate p(correct)
+per pair gives an empirical difficulty that can then order questions within a
+round, calibrate the modes currently marked "Varies", and pick zoom crops at a
+target difficulty rather than at a guessed threshold. With enough volume the
+standard move is to separate item difficulty from player ability, so a hard
+flag is not mistaken for a weak player.
+
+**The confusion matrix is the real prize.** Recording *which* country a player
+named instead of the right one builds an empirical map of which flags people
+actually mix up. That is strictly better than the computed palette-collision
+data planned for distractor selection, because it captures confusions that
+have nothing to do with colour — shared history, similar names, neighbouring
+countries. Computed collisions are the cold-start substitute; play data is the
+real thing.
+
+**The honest blocker:** this is a static site with no backend, so there is
+nowhere to aggregate anything. Options, cheapest first: keep per-player stats
+in `localStorage` (useful immediately, personal only, no aggregate); or add a
+small endpoint on something free — a Cloudflare Worker with KV, or Supabase —
+which stays compatible with GitHub Pages hosting. Anything collected from
+other people needs a plain word about it in the interface first.
 
 ## A note on cheating
 
@@ -246,6 +301,7 @@ index.html                    shell
 assets/css/style.css
 assets/js/registry.js         what quizzes exist  <-- single source of truth
 assets/js/engine.js           rounds, distractors, scoring (mode-agnostic)
+assets/js/matching.js         free-text grading and type-ahead suggestions
 assets/js/data.js             dataset loading and scopes
 assets/js/app.js              hash router
 assets/js/views/home.js       the hub
@@ -256,6 +312,38 @@ data/sources.json             upstream package versions
 scripts/build-flags.mjs       the generator
 scripts/serve.mjs             local dev server, no dependencies
 ```
+
+### Answering
+
+Two ways to answer, switchable mid-round and remembered between visits.
+
+**Type it** (the default) grades knowledge, not spelling. "Kyrgystan",
+"cote divoire" and "Holland" are all accepted; accents, case and punctuation
+are folded away, and a typo within one or two edits of a real name still
+counts. The tolerance scales with length and is zero at four characters,
+because at that size one edit is usually a different country — Chad and Cuba,
+Iran and Iraq, Mali and Malta.
+
+Suggestions appear **after two characters**, never one. This is the line
+between help and giving it away: one character would list a whole alphabetical
+block and turn the box into a browsable index of every country, which is
+exactly what a typed answer exists to avoid. Two characters means the player
+has already recalled how the name starts, and everything after that is
+spelling assistance. Aliases are searched too, so "cote" finds Ivory Coast and
+"espana" finds Spain, but English names always rank first.
+
+**Multiple choice** stays available for anyone who wants it, and is the easier
+option on a phone. Its distractors come from the answer's own region, since
+four unrelated flags make most questions trivial.
+
+### On phones
+
+The quiz is built to be played one-handed. Every control clears a 44px touch
+target, the answer input is 16px so iOS does not zoom the page on focus, and
+the flag is capped as a fraction of viewport height so it can never push the
+input off-screen. Suggestions open **upward**, because the on-screen keyboard
+covers everything below the input. Layout is verified at 390px wide and in
+landscape, and neither the hub nor the play screen scrolls sideways.
 
 ### Keeping twenty-plus quizzes from turning into a mess
 
@@ -294,13 +382,16 @@ npm start        # http://localhost:4173
 - [x] GitHub Pages deploy
 - [x] Site shell: registry, categories, hash router
 - [x] Quiz engine: rounds, region-matched distractors, scoring, results
-- [x] Mode 1, inverted
-- [ ] Free-text answers with fuzzy matching against `altNames`
+- [x] Free-text answers with typo tolerance and type-ahead
+- [x] Phone layout
+- [x] Mode 1, classic
+- [x] Mode 2, inverted
 - [ ] Colour extraction into `data/flag-colors.json`
-- [ ] Mode 3, colour pie
+- [ ] Mode 4, colour pie
 - [ ] Crop analysis into `data/flag-crops.json`, thresholds tuned by eye
-- [ ] Mode 2, zoomed
-- [ ] Modes 4-6: low-res mosaic, blur reveal, real or fake
+- [ ] Mode 3, zoomed
+- [ ] Modes 5-7: low-res mosaic, blur reveal, real or fake
+- [ ] Somewhere to store play data, then measured difficulty
 - [ ] Difficulty weighting and palette-collision distractors
 - [ ] Strong follow-ups (modes 7-12)
 - [ ] Angled crops (45°, -45°, 90°, -90°)

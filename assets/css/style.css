@@ -25,6 +25,7 @@
   --radius: 14px;
   --radius-lg: 22px;
   --shell: 1140px;
+  --tap: 44px; /* minimum comfortable touch target */
 
   --font: 'Outfit', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
     sans-serif;
@@ -61,6 +62,13 @@ body::before {
   background:
     radial-gradient(60rem 40rem at 12% -10%, rgba(255, 211, 77, 0.07), transparent 60%),
     radial-gradient(50rem 35rem at 88% 4%, rgba(77, 125, 255, 0.09), transparent 60%);
+}
+
+/* An explicit `display` on a class beats the user agent's [hidden] rule, so
+   .btn and .stage__reveal stayed visible while carrying the hidden attribute.
+   This puts the attribute back in charge. */
+[hidden] {
+  display: none !important;
 }
 
 img {
@@ -224,6 +232,12 @@ button {
   font-size: 1.05rem;
 }
 
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+
 /* -------------------------------------------------------------- categories */
 
 .jump {
@@ -274,14 +288,6 @@ button {
   max-width: 42rem;
 }
 
-.category__count {
-  margin: 0.2rem 0 0;
-  color: var(--text-faint);
-  font-size: 0.82rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
 /* ------------------------------------------------------------------- cards */
 
 .grid {
@@ -301,13 +307,9 @@ button {
   transition: transform 0.16s ease, border-color 0.16s ease;
 }
 
-.card--live:hover {
+.card:hover {
   transform: translateY(-3px);
   border-color: var(--accent);
-}
-
-.card--soon {
-  opacity: 0.62;
 }
 
 .card__preview {
@@ -324,33 +326,11 @@ button {
   filter: var(--mode-filter, none);
 }
 
-.card__preview--empty {
-  display: grid;
-  place-items: center;
-  color: var(--text-faint);
-  font-size: 2.5rem;
-  font-weight: 900;
-  background-image:
-    linear-gradient(45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.03) 75%),
-    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.03) 75%);
-  background-size: 18px 18px;
-  background-position: 0 0, 0 9px, 9px -9px, -9px 0;
-}
-
 .card__body {
   padding: 1rem 1.1rem 1.2rem;
   display: grid;
   gap: 0.45rem;
   align-content: start;
-}
-
-.card__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem;
 }
 
 .card__title {
@@ -367,30 +347,50 @@ button {
   line-height: 1.45;
 }
 
-.card__meta {
-  margin: 0.15rem 0 0;
-  color: var(--text-faint);
-  font-size: 0.78rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+/* ---------------------------------------------------------------- upcoming */
+
+.upcoming {
+  margin-top: 1.4rem;
 }
 
-.tag {
-  flex: none;
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
+.upcoming__title {
+  margin: 0 0 0.7rem;
+  font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
+  color: var(--text-faint);
 }
-.tag--live {
-  background: var(--accent);
-  color: var(--accent-ink);
+
+.upcoming__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 0.15rem 1.6rem;
 }
-.tag--soon {
-  background: var(--line);
+
+.upcoming__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.88rem;
+}
+
+.upcoming__name {
+  flex: none;
+  font-weight: 600;
   color: var(--text-dim);
+}
+
+.upcoming__blurb {
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* -------------------------------------------------------------------- quiz */
@@ -408,8 +408,8 @@ button {
 }
 
 .quiz__back {
-  width: 2.4rem;
-  height: 2.4rem;
+  width: var(--tap);
+  height: var(--tap);
   flex: none;
   display: grid;
   place-items: center;
@@ -423,30 +423,10 @@ button {
   border-color: var(--line-bright);
 }
 
-.quiz__id {
-  display: grid;
-  margin-right: auto;
-}
 .quiz__mode {
+  margin-right: auto;
   font-weight: 700;
   letter-spacing: -0.015em;
-}
-.quiz__scope select {
-  appearance: none;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--text-faint);
-  font: inherit;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-.quiz__scope select:hover {
-  color: var(--text-dim);
-}
-.quiz__scope option {
-  background: var(--bg-raised);
-  color: var(--text);
 }
 
 .sr-only {
@@ -489,7 +469,10 @@ button {
 
 .stage__figure {
   position: relative;
-  margin: 0;
+  margin: 0 auto;
+  /* 4:3, so capping height caps width. Keeps the flag from pushing the input
+     off-screen on short viewports and in landscape. */
+  max-width: min(100%, calc(52vh * 4 / 3));
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--bg-sunken);
@@ -547,6 +530,7 @@ button {
 
 .option {
   padding: 0.95rem 1rem;
+  min-height: var(--tap);
   border: 1px solid var(--line-bright);
   border-radius: var(--radius);
   background: var(--bg-raised);
@@ -585,10 +569,131 @@ button {
   min-height: 2.8rem;
 }
 
-.quiz__hint {
-  margin: 0;
+.quiz__settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.setting select {
+  appearance: none;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-raised);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-height: 2.25rem;
+}
+.setting select:hover {
+  color: var(--text);
+  border-color: var(--line-bright);
+}
+.setting option {
+  background: var(--bg-raised);
+  color: var(--text);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- typed answer */
+
+.typer {
+  display: flex;
+  gap: 0.6rem;
+  align-items: stretch;
+}
+
+.typer__field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.typer__input {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  color: var(--text);
+  font-family: inherit;
+  /* Never below 16px: smaller text makes iOS Safari zoom the page on focus. */
+  font-size: 1rem;
+  font-weight: 600;
+}
+.typer__input::placeholder {
   color: var(--text-faint);
-  font-size: 0.87rem;
+  font-weight: 400;
+}
+.typer__input:disabled {
+  opacity: 1;
+}
+.typer__input.is-correct {
+  border-color: var(--good);
+  background: rgba(69, 212, 131, 0.14);
+}
+.typer__input.is-wrong {
+  border-color: var(--bad);
+  background: rgba(255, 107, 107, 0.14);
+  text-decoration: line-through;
+  text-decoration-color: var(--bad);
+}
+
+/* The list opens upward: on a phone the on-screen keyboard covers everything
+   below the input, so downward suggestions would be invisible. */
+.typer__list {
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.typer__option {
+  padding: 0.6rem 0.7rem;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 2.4rem;
+  display: flex;
+  align-items: center;
+}
+.typer__option:hover,
+.typer__option.is-active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.typer__submit,
+.typer__skip {
+  flex: none;
+  min-height: var(--tap);
+}
+
+.typer__feedback {
+  margin: 0.7rem 0 0;
+  color: var(--bad);
+  font-weight: 600;
 }
 
 /* ----------------------------------------------------------------- results */
@@ -731,19 +836,78 @@ button {
 
 /* ------------------------------------------------------------ small screens */
 
-@media (max-width: 560px) {
+@media (max-width: 680px) {
+  html {
+    scroll-padding-top: 72px;
+  }
+
+  .app {
+    padding-bottom: 2.5rem;
+  }
+
+  /* One column: two-up country names wrap badly at phone widths, and a full
+     width row is a much easier target with a thumb. */
   .options {
     grid-template-columns: 1fr;
   }
+
   .quiz__foot {
     flex-direction: column-reverse;
     align-items: stretch;
+    gap: 0.9rem;
   }
   .quiz__foot .btn {
     width: 100%;
   }
-  .quiz__hint {
-    text-align: center;
+  .quiz__settings {
+    justify-content: center;
+  }
+
+  /* Input on its own row; the two buttons share the row beneath it, so the
+     field keeps full width for long country names. */
+  .typer {
+    flex-wrap: wrap;
+  }
+  .typer__field {
+    flex: 1 0 100%;
+  }
+  .typer__submit {
+    flex: 1 1 auto;
+  }
+  .typer__skip {
+    flex: 0 1 auto;
+  }
+
+  .upcoming__item {
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .upcoming__blurb {
+    white-space: normal;
+  }
+
+  .miss {
+    flex-wrap: wrap;
+  }
+  .miss__chosen {
+    margin-left: 0;
+    flex-basis: 100%;
+    text-align: left;
+    padding-left: calc(38px + 0.8rem);
+  }
+
+  .results__actions .btn {
+    flex: 1 1 auto;
+  }
+}
+
+/* Landscape phones: almost no vertical room, so the flag gives some back. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .stage__figure {
+    max-width: min(100%, calc(44vh * 4 / 3));
+  }
+  .masthead {
+    position: static;
   }
 }
 
