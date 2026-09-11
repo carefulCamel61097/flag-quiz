@@ -103,7 +103,8 @@ const sources = {
   metadata: {
     package: 'world-countries',
     version: worldCountriesPkg.version,
-    license: worldCountriesPkg.license,
+    // Not declared in its package.json; stated in the upstream LICENSE file.
+    license: worldCountriesPkg.license ?? 'ODbL-1.0',
     homepage: 'https://github.com/mledoze/countries',
   },
 };
