@@ -1,5 +1,7 @@
 # Flag Quiz
 
+### ▶ [Play it](https://carefulcamel61097.github.io/flag-quiz/)
+
 A small static site of flag guessing games, where every puzzle is **derived
 programmatically from one clean set of source flags** rather than authored by
 hand. Show the player a distorted, abstracted or partial view of a flag; they
@@ -8,8 +10,8 @@ name the country.
 Because every game mode is just a transform over the same 250 SVGs, adding a
 new mode costs one function, not 250 pieces of content.
 
-Status: **early** — flag assets and country data are in place, the site itself
-is not built yet. See [Roadmap](#roadmap).
+Status: **playable** — the site is live with the first mode (Inverted). The
+other nineteen are listed in the app as Soon. See [Roadmap](#roadmap).
 
 ## Game modes
 
@@ -235,27 +237,65 @@ the hash-to-country mapping out of the page until after the answer is given.
 
 ## Architecture
 
-A static site, deployed to GitHub Pages from the repository root. No backend,
-no framework requirement, no runtime build.
+A static site, deployed to GitHub Pages from the repository root. Vanilla ES
+modules, no framework, no bundler, no runtime build. Everything the site needs
+is a static file that can be fetched and cached.
 
 ```
-assets/flags/4x3/*.svg   250 flags, generated
-data/countries.json      250 country records, generated
-data/sources.json        upstream package versions
-scripts/build-flags.mjs  the generator
+index.html                    shell
+assets/css/style.css
+assets/js/registry.js         what quizzes exist  <-- single source of truth
+assets/js/engine.js           rounds, distractors, scoring (mode-agnostic)
+assets/js/data.js             dataset loading and scopes
+assets/js/app.js              hash router
+assets/js/views/home.js       the hub
+assets/js/views/quiz.js       the play screen (shared by every mode)
+assets/flags/4x3/*.svg        250 flags, generated
+data/countries.json           250 country records, generated
+data/sources.json             upstream package versions
+scripts/build-flags.mjs       the generator
+scripts/serve.mjs             local dev server, no dependencies
 ```
 
-Everything the site needs is a static file that can be fetched and cached.
-The transforms run client-side on a `<canvas>`, except colour analysis, which
-is precomputed because it needs a rasteriser.
+### Keeping twenty-plus quizzes from turning into a mess
+
+The risk with this many modes is a site that becomes an undifferentiated wall
+of tiles. Three rules hold that off:
+
+**One registry, everything derived.** [`registry.js`](assets/js/registry.js)
+is the only place a mode is declared. The home page, the category navigation
+and the router all read from it, so the site cannot list a quiz that does not
+exist, or quietly miss one that does. There is no hand-maintained menu to
+drift.
+
+**Categories describe what the player sees, not how it is built.** Colour,
+Detail, Distortion and Compare are distinctions you can feel while playing.
+Grouping by implementation would file Inverted next to Colour Pie because both
+touch colour data, which helps nobody.
+
+**Unbuilt modes are visible but clearly marked.** Listing all twenty with
+`Soon` badges keeps the eventual shape of the site honest, and makes the
+ordering argument above checkable against what is actually playable.
+
+Adding a mode is one registry entry plus, at most, one transform. Modes
+expressible as a CSS filter (Inverted, Greyscale, Blur, Hue Shift) need no
+code at all beyond that entry, and stay vector-crisp at any size.
+
+### Running it locally
+
+```bash
+npm start        # http://localhost:4173
+```
 
 ## Roadmap
 
 - [x] Source clean flag images for every country
 - [x] Country dataset with names, regions and sovereignty tiers
-- [x] GitHub Pages deploy (assets and data serve; no site yet)
-- [ ] Quiz engine: question generation, answer matching, scoring
-- [ ] Mode 1, inverted — needs no pipeline, so it goes first
+- [x] GitHub Pages deploy
+- [x] Site shell: registry, categories, hash router
+- [x] Quiz engine: rounds, region-matched distractors, scoring, results
+- [x] Mode 1, inverted
+- [ ] Free-text answers with fuzzy matching against `altNames`
 - [ ] Colour extraction into `data/flag-colors.json`
 - [ ] Mode 3, colour pie
 - [ ] Crop analysis into `data/flag-crops.json`, thresholds tuned by eye

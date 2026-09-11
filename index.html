@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flag Quiz</title>
+    <meta
+      name="description"
+      content="Flag quizzes that hide the flag: inverted colours, crops, blurs and colour pie charts. Name the country."
+    />
+    <meta name="theme-color" content="#0d1017" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='11' y='3' fill='%23ff4d4d'/%3E%3Crect width='32' height='11' y='14' fill='%23f7f7f7'/%3E%3Crect width='32' height='7' y='25' fill='%234d7dff'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body data-view="home">
+    <a class="skip" href="#app">Skip to content</a>
+
+    <header class="masthead">
+      <a class="masthead__brand" href="#/">
+        <span class="masthead__mark" aria-hidden="true"></span>
+        <span class="masthead__name">Flag Quiz</span>
+      </a>
+      <a
+        class="masthead__source"
+        href="https://github.com/carefulCamel61097/flag-quiz"
+        rel="noopener"
+        >Source</a
+      >
+    </header>
+
+    <main id="app" class="app">
+      <noscript>
+        <section class="panel panel--centred">
+          <h1 class="panel__title">JavaScript required</h1>
+          <p class="panel__text">
+            The quizzes are generated in the browser, so this site needs
+            JavaScript switched on.
+          </p>
+        </section>
+      </noscript>
+    </main>
+
+    <footer class="colophon">
+      <p>
+        Flags from
+        <a href="https://github.com/lipis/flag-icons" rel="noopener">flag-icons</a>
+        (MIT). Country data from
+        <a href="https://github.com/mledoze/countries" rel="noopener">mledoze/countries</a>
+        (ODbL).
+      </p>
+    </footer>
+
+    <script type="module" src="assets/js/app.js"></script>
+  </body>
+</html>

@@ -5,6 +5,7 @@
   "description": "Programmatically generated flag quizzes (colour pie charts, inverted flags, zoomed crops).",
   "type": "module",
   "scripts": {
+    "start": "node scripts/serve.mjs",
     "build:flags": "node scripts/build-flags.mjs"
   },
   "devDependencies": {
