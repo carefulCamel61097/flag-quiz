@@ -87,8 +87,14 @@ export const MODES = [
     name: 'Colour Pie',
     category: 'colour',
     rank: 4,
-    status: 'soon',
+    status: 'live',
     blurb: 'Just a pie chart of the flag&rsquo;s colours and how much of it each covers.',
+    hint: 'Slice sizes are exact. Order tells you nothing.',
+    preview: 'za',
+    // Draws from the measured palette instead of showing the flag, and grades
+    // against palette twins because several flags make the same pie.
+    stage: 'pie',
+    ambiguity: 'palette',
   },
   {
     id: 'mosaic',

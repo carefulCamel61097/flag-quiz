@@ -10,9 +10,9 @@ name the country.
 Because every game mode is just a transform over the same 250 SVGs, adding a
 new mode costs one function, not 250 pieces of content.
 
-Status: **playable** — two modes are live (Classic and Inverted), with free-text
-or multiple-choice answers. The other nineteen are listed as planned. See
-[Roadmap](#roadmap).
+Status: **playable** — three modes are live (Classic, Inverted, Colour Pie),
+with free-text or multiple-choice answers. The other eighteen are listed as
+planned. See [Roadmap](#roadmap).
 
 ## Game modes
 
@@ -25,10 +25,10 @@ crop pipelines already exist.
 
 | # | Mode | What the player sees | Appeal | Effort |
 | --- | --- | --- | --- | --- |
-| 1 | **Classic** | The flag, untouched. The quiz everyone expects to find, and the baseline every other mode is measured against. | High | Trivial |
-| 2 | **Inverted** | The flag with RGB values inverted. Red becomes cyan, white becomes black. Surprisingly hard, and instantly recognisable once it clicks. | High | Trivial — one canvas pass or a CSS filter, nothing precomputed |
+| 1 | **Classic** | The flag, untouched. The quiz everyone expects to find, and the baseline every other mode is measured against. | High | Built |
+| 2 | **Inverted** | The flag with RGB values inverted. Red becomes cyan, white becomes black. Surprisingly hard, and instantly recognisable once it clicks. | High | Built |
 | 3 | **Zoomed** | A small crop blown up. The classic format, and the most immediately understandable. | High | Medium — needs the crop pipeline below |
-| 4 | **Colour pie** | A pie chart of the flag's colours, sized by how much of the flag each covers. No shapes, no layout — just the palette and its proportions. | High | Medium — needs the colour pipeline below |
+| 4 | **Colour pie** | A pie chart of the flag's colours, sized by how much of the flag each covers. No shapes, no layout — just the palette and its proportions. | High | Built |
 | 5 | **Low-res mosaic** | The flag downsampled to an N×M block grid. Difficulty is a single integer, which makes this the cleanest difficulty dial in the set and a natural progressive-reveal mode. | High | Low |
 | 6 | **Blur reveal** | Starts heavily blurred and sharpens on a timer. Points decay as it gets easier. | High | Low |
 | 7 | **Real or fake?** | A flag with one property subtly altered — stripe order swapped, a colour shifted 15° in hue, a star miscounted, band widths changed. Real or fake? | High | Low–medium |
@@ -46,7 +46,7 @@ headline feature.
 | 9 | **Twin flags** | Chad and Romania side by side, or Indonesia and Monaco. Which is which? | Medium–high | Low, once palette-collision data exists |
 | 10 | **Silhouette** | The emblem only, flattened to one colour on a plain field. Brutal, and great for the flags with coats of arms. | Medium | Medium — needs emblem isolation |
 | 11 | **Scrambled** | The flag cut into a grid and shuffled. | Medium | Low |
-| 12 | **Palette bar** | The colour-pie data as a stacked bar, which hides the "which slice is biggest" tell a pie gives away. | Medium | Trivial, once the pie exists |
+| 12 | **Palette bar** | The colour-pie data as a stacked bar, which hides the "which slice is biggest" tell a pie gives away. | Medium | Trivial — the data and the twin handling already exist |
 | 13 | **Polar** | The flag remapped into polar coordinates so it becomes a disc. Horizontal tricolours turn into concentric rings, vertical ones into wedges. Visually striking and it defamiliarises flags you would otherwise know instantly. | Medium | Low — about ten lines of canvas maths |
 
 ### Long tail and variations
@@ -131,7 +131,7 @@ hand-maintained synonym list.
 
 ```bash
 npm install
-npm run build:flags
+npm run build        # flags and country data, then colour measurement
 ```
 
 [`scripts/build-flags.mjs`](scripts/build-flags.mjs) copies the 4:3 SVGs into
@@ -140,33 +140,91 @@ It is idempotent: it clears the output directory each run, so flags dropped
 upstream do not linger. Bump the versions in `package.json` to pick up
 upstream changes.
 
-## How the colour analysis will work
+[`scripts/build-colors.mjs`](scripts/build-colors.mjs) then measures every
+flag and writes `data/flag-colors.json`. It takes about two minutes, and needs
+`@resvg/resvg-js` — a build-time dependency only, never shipped to the
+browser.
 
-The colour modes need to know that the Netherlands is 33% `#ae1c28`, 34%
-`#ffffff`, 33% `#21468b`. That is computed **at build time**, not in the
-browser:
+## How the colour analysis works
 
-1. Rasterise each SVG at a fixed size (a few hundred pixels wide is plenty —
-   we want colour proportions, not detail).
-2. Count pixels per colour.
-3. Quantise. Anti-aliased edges and gradients produce thousands of
-   near-identical colours; snap them to the nearest dominant colour so the
-   Netherlands reports three colours, not four thousand.
-4. Drop anything under a threshold (~0.5%), which removes stray edge pixels
-   while keeping genuinely small details like a thin fimbriation.
-5. Write the result to `data/flag-colors.json`.
+The colour modes need to know that the Netherlands is exactly one third
+`#ae1c28`, one third `#ffffff` and one third `#21468b`. That is measured **at
+build time** by [`scripts/build-colors.mjs`](scripts/build-colors.mjs), which
+rasterises every flag with [resvg](https://github.com/yisibl/resvg-js),
+counts pixels, and writes `data/flag-colors.json` (36 KB). The site only ever
+loads the JSON.
 
-Two details worth knowing before implementing this:
+It is accurate to about **0.03 percentage points**. Bangladesh's disc measures
+26.15% against a true 26.18% derived from the SVG geometry; Japan's measures
+22.74% against 22.77%.
 
-- **Aspect ratio does not matter.** `flag-icons` normalises every flag to 4:3,
-  which is not the official ratio for most of them. This turns out to be
-  harmless: scaling x and y independently multiplies every region's area by
-  the same factor, so *relative* colour proportions are preserved exactly.
-- **Nepal is not a rectangle.** Its SVG has a transparent background around
-  the pennant shape. Transparent pixels must be excluded from the count, or
-  Nepal comes out as mostly "nothing". It is the only flag with this
-  property, but it is the one that will silently break a naive
-  implementation.
+Four things decide whether this works:
+
+**Turn anti-aliasing off.** This matters more than anything else. Smoothed
+edges invent colours that are not in the flag — blends sitting on the line
+between two real ones — and on a striped flag there are enough edge pixels for
+a blend to look like a real colour. The United States came out with a phantom
+pink at 3.5%, which would have shown up as a genuine slice in the pie.
+Rendering with `crispEdges` removes them at source: the US drops from 13
+shades to exactly 3, Greece from 17 to 2. It also measures *better*, because a
+hard edge lands on one side or the other with no bias.
+
+**Seed clusters from coverage, not distance.** What survives anti-aliasing
+removal is gradients and shading in coats of arms. Rather than merging colours
+within some distance of each other, which risks fusing two genuinely similar
+reds, only colours with real coverage become cluster centres and everything
+else is assigned to its nearest one. An edge or shading pixel belongs there
+anyway.
+
+**Aspect ratio does not matter.** `flag-icons` normalises every flag to 4:3,
+which is not the official ratio for most of them. Harmless: scaling x and y
+independently multiplies every region's area by the same factor, so *relative*
+proportions are preserved exactly.
+
+**Nepal is not a rectangle.** Its SVG is 64% transparent around the pennant
+shape. Transparent pixels are excluded, or Nepal would come out as mostly
+"nothing". It is the only flag like this, and the one that silently breaks a
+naive implementation.
+
+One footgun worth recording: resvg's `image.pixels` is a getter that allocates
+a fresh Buffer on every read. Touching it inside a per-pixel loop exhausts
+memory within seconds.
+
+## When a question has more than one right answer
+
+Hiding a flag can hide the very thing that told it apart from another flag.
+The quiz has to know when that has happened, or it marks fair answers wrong.
+Two kinds of collision, both computed at build time:
+
+**Identical flags.** Thirteen flags in three groups are byte-identical: every
+French overseas territory flies the French tricolour, Heard Island flies
+Australia's, Saint Helena flies the Union Jack. Shown the tricolour in the
+"All 250 flags" scope, there are nine correct answers. `build-flags.mjs`
+hashes the artwork and records `sameFlagAs` on each country. This affects
+every mode, including the plain Classic quiz.
+
+**Palette twins.** In a colour mode, Guinea and Mali make the same pie.
+So do Belgium and Germany, Czechia and Slovakia, Chad and Romania, and
+Indonesia with Monaco, Poland and Singapore. `build-colors.mjs` compares
+every pair: same number of slices, and each slice matching one in the other by
+both colour and size. 73 of 250 flags have at least one twin.
+
+Slice *count* is part of that test, and it is what makes the metric work.
+Earlier attempts — share-weighted colour distance, then earth-mover distance —
+both called Japan and Tonga twins, because most of the mass matches at near
+zero cost. But Japan is 77% white and Tonga is 76% red; the pies look nothing
+alike. Matching slice-to-slice and taking the *worst* pair catches that.
+
+What the quiz does with it:
+
+- Any equivalent country is accepted as correct, and the player is told why:
+  *"Also accepted — Germany makes the same pie as Belgium."* A question with
+  two right answers should say so, not quietly pick one.
+- No two equivalents are ever offered in the same multiple-choice question,
+  so there is never a second correct option to pick from.
+
+The same reasoning is what the [zoom crop pipeline](#how-the-zoom-crops-will-work)
+will need, and this is the first place it has been built.
 
 ## How the zoom crops will work
 
@@ -308,8 +366,10 @@ assets/js/views/home.js       the hub
 assets/js/views/quiz.js       the play screen (shared by every mode)
 assets/flags/4x3/*.svg        250 flags, generated
 data/countries.json           250 country records, generated
+data/flag-colors.json         measured palettes and palette twins, generated
 data/sources.json             upstream package versions
-scripts/build-flags.mjs       the generator
+scripts/build-flags.mjs       flags and country data
+scripts/build-colors.mjs      colour measurement and twin detection
 scripts/serve.mjs             local dev server, no dependencies
 ```
 
@@ -386,8 +446,9 @@ npm start        # http://localhost:4173
 - [x] Phone layout
 - [x] Mode 1, classic
 - [x] Mode 2, inverted
-- [ ] Colour extraction into `data/flag-colors.json`
-- [ ] Mode 4, colour pie
+- [x] Colour extraction into `data/flag-colors.json`
+- [x] Identical-flag and palette-twin detection, with twin-aware grading
+- [x] Mode 4, colour pie
 - [ ] Crop analysis into `data/flag-crops.json`, thresholds tuned by eye
 - [ ] Mode 3, zoomed
 - [ ] Modes 5-7: low-res mosaic, blur reveal, real or fake

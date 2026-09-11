@@ -24,7 +24,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/af.svg"
+    "flag": "assets/flags/4x3/af.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ax",
@@ -59,7 +60,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/ax.svg"
+    "flag": "assets/flags/4x3/ax.svg",
+    "sameFlagAs": []
   },
   {
     "code": "al",
@@ -93,7 +95,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/al.svg"
+    "flag": "assets/flags/4x3/al.svg",
+    "sameFlagAs": []
   },
   {
     "code": "dz",
@@ -126,7 +129,8 @@
     "region": "Africa",
     "subregion": "Northern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/dz.svg"
+    "flag": "assets/flags/4x3/dz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "as",
@@ -162,7 +166,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/as.svg"
+    "flag": "assets/flags/4x3/as.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ad",
@@ -186,7 +191,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ad.svg"
+    "flag": "assets/flags/4x3/ad.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ao",
@@ -209,7 +215,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ao.svg"
+    "flag": "assets/flags/4x3/ao.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ai",
@@ -230,7 +237,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/ai.svg"
+    "flag": "assets/flags/4x3/ai.svg",
+    "sameFlagAs": []
   },
   {
     "code": "aq",
@@ -261,7 +269,8 @@
     "region": "Antarctic",
     "subregion": "",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/aq.svg"
+    "flag": "assets/flags/4x3/aq.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ag",
@@ -294,7 +303,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ag.svg"
+    "flag": "assets/flags/4x3/ag.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ar",
@@ -323,7 +333,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ar.svg"
+    "flag": "assets/flags/4x3/ar.svg",
+    "sameFlagAs": []
   },
   {
     "code": "am",
@@ -356,7 +367,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/am.svg"
+    "flag": "assets/flags/4x3/am.svg",
+    "sameFlagAs": []
   },
   {
     "code": "aw",
@@ -376,7 +388,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/aw.svg"
+    "flag": "assets/flags/4x3/aw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "au",
@@ -406,7 +419,10 @@
     "region": "Oceania",
     "subregion": "Australia and New Zealand",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/au.svg"
+    "flag": "assets/flags/4x3/au.svg",
+    "sameFlagAs": [
+      "hm"
+    ]
   },
   {
     "code": "at",
@@ -440,7 +456,8 @@
     "region": "Europe",
     "subregion": "Central Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/at.svg"
+    "flag": "assets/flags/4x3/at.svg",
+    "sameFlagAs": []
   },
   {
     "code": "az",
@@ -477,7 +494,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/az.svg"
+    "flag": "assets/flags/4x3/az.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bs",
@@ -505,7 +523,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bs.svg"
+    "flag": "assets/flags/4x3/bs.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bh",
@@ -530,7 +549,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bh.svg"
+    "flag": "assets/flags/4x3/bh.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bd",
@@ -558,7 +578,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bd.svg"
+    "flag": "assets/flags/4x3/bd.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bb",
@@ -578,7 +599,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bb.svg"
+    "flag": "assets/flags/4x3/bb.svg",
+    "sameFlagAs": []
   },
   {
     "code": "by",
@@ -615,7 +637,8 @@
     "region": "Europe",
     "subregion": "Eastern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/by.svg"
+    "flag": "assets/flags/4x3/by.svg",
+    "sameFlagAs": []
   },
   {
     "code": "be",
@@ -649,7 +672,8 @@
     "region": "Europe",
     "subregion": "Western Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/be.svg"
+    "flag": "assets/flags/4x3/be.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bz",
@@ -670,7 +694,8 @@
     "region": "Americas",
     "subregion": "Central America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bz.svg"
+    "flag": "assets/flags/4x3/bz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bj",
@@ -694,7 +719,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bj.svg"
+    "flag": "assets/flags/4x3/bj.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bm",
@@ -719,7 +745,8 @@
     "region": "Americas",
     "subregion": "North America",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/bm.svg"
+    "flag": "assets/flags/4x3/bm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bt",
@@ -745,7 +772,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bt.svg"
+    "flag": "assets/flags/4x3/bt.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bo",
@@ -781,7 +809,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bo.svg"
+    "flag": "assets/flags/4x3/bo.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ba",
@@ -817,7 +846,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ba.svg"
+    "flag": "assets/flags/4x3/ba.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bw",
@@ -840,7 +870,8 @@
     "region": "Africa",
     "subregion": "Southern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bw.svg"
+    "flag": "assets/flags/4x3/bw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bv",
@@ -878,7 +909,8 @@
     "region": "Antarctic",
     "subregion": "",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/bv.svg"
+    "flag": "assets/flags/4x3/bv.svg",
+    "sameFlagAs": []
   },
   {
     "code": "br",
@@ -911,7 +943,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/br.svg"
+    "flag": "assets/flags/4x3/br.svg",
+    "sameFlagAs": []
   },
   {
     "code": "io",
@@ -947,7 +980,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/io.svg"
+    "flag": "assets/flags/4x3/io.svg",
+    "sameFlagAs": []
   },
   {
     "code": "vg",
@@ -985,7 +1019,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/vg.svg"
+    "flag": "assets/flags/4x3/vg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bn",
@@ -1010,7 +1045,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bn.svg"
+    "flag": "assets/flags/4x3/bn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bg",
@@ -1041,7 +1077,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bg.svg"
+    "flag": "assets/flags/4x3/bg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bf",
@@ -1062,7 +1099,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bf.svg"
+    "flag": "assets/flags/4x3/bf.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bi",
@@ -1085,7 +1123,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/bi.svg"
+    "flag": "assets/flags/4x3/bi.svg",
+    "sameFlagAs": []
   },
   {
     "code": "kh",
@@ -1118,7 +1157,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/kh.svg"
+    "flag": "assets/flags/4x3/kh.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cm",
@@ -1147,7 +1187,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cm.svg"
+    "flag": "assets/flags/4x3/cm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ca",
@@ -1169,7 +1210,8 @@
     "region": "Americas",
     "subregion": "North America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ca.svg"
+    "flag": "assets/flags/4x3/ca.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cv",
@@ -1203,7 +1245,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cv.svg"
+    "flag": "assets/flags/4x3/cv.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bq",
@@ -1241,7 +1284,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/bq.svg"
+    "flag": "assets/flags/4x3/bq.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ky",
@@ -1277,7 +1321,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/ky.svg"
+    "flag": "assets/flags/4x3/ky.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cf",
@@ -1313,7 +1358,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cf.svg"
+    "flag": "assets/flags/4x3/cf.svg",
+    "sameFlagAs": []
   },
   {
     "code": "td",
@@ -1346,7 +1392,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/td.svg"
+    "flag": "assets/flags/4x3/td.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cl",
@@ -1373,7 +1420,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cl.svg"
+    "flag": "assets/flags/4x3/cl.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cn",
@@ -1406,7 +1454,8 @@
     "region": "Asia",
     "subregion": "Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cn.svg"
+    "flag": "assets/flags/4x3/cn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cx",
@@ -1443,7 +1492,8 @@
     "region": "Oceania",
     "subregion": "Australia and New Zealand",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/cx.svg"
+    "flag": "assets/flags/4x3/cx.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cc",
@@ -1481,7 +1531,8 @@
     "region": "Oceania",
     "subregion": "Australia and New Zealand",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/cc.svg"
+    "flag": "assets/flags/4x3/cc.svg",
+    "sameFlagAs": []
   },
   {
     "code": "co",
@@ -1510,7 +1561,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/co.svg"
+    "flag": "assets/flags/4x3/co.svg",
+    "sameFlagAs": []
   },
   {
     "code": "km",
@@ -1546,7 +1598,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/km.svg"
+    "flag": "assets/flags/4x3/km.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ck",
@@ -1583,7 +1636,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/ck.svg"
+    "flag": "assets/flags/4x3/ck.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cr",
@@ -1608,7 +1662,8 @@
     "region": "Americas",
     "subregion": "Central America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cr.svg"
+    "flag": "assets/flags/4x3/cr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "hr",
@@ -1644,7 +1699,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/hr.svg"
+    "flag": "assets/flags/4x3/hr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cu",
@@ -1669,7 +1725,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cu.svg"
+    "flag": "assets/flags/4x3/cu.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cw",
@@ -1697,7 +1754,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/cw.svg"
+    "flag": "assets/flags/4x3/cw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cy",
@@ -1733,7 +1791,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cy.svg"
+    "flag": "assets/flags/4x3/cy.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cz",
@@ -1769,7 +1828,8 @@
     "region": "Europe",
     "subregion": "Central Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cz.svg"
+    "flag": "assets/flags/4x3/cz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "dk",
@@ -1804,7 +1864,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/dk.svg"
+    "flag": "assets/flags/4x3/dk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "dj",
@@ -1839,7 +1900,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/dj.svg"
+    "flag": "assets/flags/4x3/dj.svg",
+    "sameFlagAs": []
   },
   {
     "code": "dm",
@@ -1864,7 +1926,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/dm.svg"
+    "flag": "assets/flags/4x3/dm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "do",
@@ -1898,7 +1961,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/do.svg"
+    "flag": "assets/flags/4x3/do.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cd",
@@ -1937,7 +2001,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cd.svg"
+    "flag": "assets/flags/4x3/cd.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ec",
@@ -1964,7 +2029,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ec.svg"
+    "flag": "assets/flags/4x3/ec.svg",
+    "sameFlagAs": []
   },
   {
     "code": "eg",
@@ -1996,7 +2062,8 @@
     "region": "Africa",
     "subregion": "Northern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/eg.svg"
+    "flag": "assets/flags/4x3/eg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sv",
@@ -2021,7 +2088,8 @@
     "region": "Americas",
     "subregion": "Central America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sv.svg"
+    "flag": "assets/flags/4x3/sv.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gq",
@@ -2059,7 +2127,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gq.svg"
+    "flag": "assets/flags/4x3/gq.svg",
+    "sameFlagAs": []
   },
   {
     "code": "er",
@@ -2089,7 +2158,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/er.svg"
+    "flag": "assets/flags/4x3/er.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ee",
@@ -2121,7 +2191,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ee.svg"
+    "flag": "assets/flags/4x3/ee.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sz",
@@ -2157,7 +2228,8 @@
     "region": "Africa",
     "subregion": "Southern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sz.svg"
+    "flag": "assets/flags/4x3/sz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "et",
@@ -2191,7 +2263,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/et.svg"
+    "flag": "assets/flags/4x3/et.svg",
+    "sameFlagAs": []
   },
   {
     "code": "fk",
@@ -2226,7 +2299,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/fk.svg"
+    "flag": "assets/flags/4x3/fk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "fo",
@@ -2264,7 +2338,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/fo.svg"
+    "flag": "assets/flags/4x3/fo.svg",
+    "sameFlagAs": []
   },
   {
     "code": "fj",
@@ -2297,7 +2372,8 @@
     "region": "Oceania",
     "subregion": "Melanesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/fj.svg"
+    "flag": "assets/flags/4x3/fj.svg",
+    "sameFlagAs": []
   },
   {
     "code": "fi",
@@ -2331,7 +2407,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/fi.svg"
+    "flag": "assets/flags/4x3/fi.svg",
+    "sameFlagAs": []
   },
   {
     "code": "fr",
@@ -2366,7 +2443,17 @@
     "region": "Europe",
     "subregion": "Western Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/fr.svg"
+    "flag": "assets/flags/4x3/fr.svg",
+    "sameFlagAs": [
+      "gf",
+      "gp",
+      "yt",
+      "re",
+      "bl",
+      "mf",
+      "pm",
+      "wf"
+    ]
   },
   {
     "code": "gf",
@@ -2402,7 +2489,17 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/gf.svg"
+    "flag": "assets/flags/4x3/gf.svg",
+    "sameFlagAs": [
+      "fr",
+      "gp",
+      "yt",
+      "re",
+      "bl",
+      "mf",
+      "pm",
+      "wf"
+    ]
   },
   {
     "code": "pf",
@@ -2438,7 +2535,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/pf.svg"
+    "flag": "assets/flags/4x3/pf.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tf",
@@ -2476,7 +2574,8 @@
     "region": "Antarctic",
     "subregion": "",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/tf.svg"
+    "flag": "assets/flags/4x3/tf.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ga",
@@ -2501,7 +2600,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ga.svg"
+    "flag": "assets/flags/4x3/ga.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gm",
@@ -2526,7 +2626,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gm.svg"
+    "flag": "assets/flags/4x3/gm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ge",
@@ -2558,7 +2659,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ge.svg"
+    "flag": "assets/flags/4x3/ge.svg",
+    "sameFlagAs": []
   },
   {
     "code": "de",
@@ -2596,7 +2698,8 @@
     "region": "Europe",
     "subregion": "Western Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/de.svg"
+    "flag": "assets/flags/4x3/de.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gh",
@@ -2619,7 +2722,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gh.svg"
+    "flag": "assets/flags/4x3/gh.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gi",
@@ -2641,7 +2745,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/gi.svg"
+    "flag": "assets/flags/4x3/gi.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gr",
@@ -2677,7 +2782,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gr.svg"
+    "flag": "assets/flags/4x3/gr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gl",
@@ -2707,7 +2813,8 @@
     "region": "Americas",
     "subregion": "North America",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/gl.svg"
+    "flag": "assets/flags/4x3/gl.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gd",
@@ -2729,7 +2836,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gd.svg"
+    "flag": "assets/flags/4x3/gd.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gp",
@@ -2755,7 +2863,17 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/gp.svg"
+    "flag": "assets/flags/4x3/gp.svg",
+    "sameFlagAs": [
+      "fr",
+      "gf",
+      "yt",
+      "re",
+      "bl",
+      "mf",
+      "pm",
+      "wf"
+    ]
   },
   {
     "code": "gu",
@@ -2777,7 +2895,8 @@
     "region": "Oceania",
     "subregion": "Micronesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/gu.svg"
+    "flag": "assets/flags/4x3/gu.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gt",
@@ -2800,7 +2919,8 @@
     "region": "Americas",
     "subregion": "Central America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gt.svg"
+    "flag": "assets/flags/4x3/gt.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gg",
@@ -2823,7 +2943,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/gg.svg"
+    "flag": "assets/flags/4x3/gg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gn",
@@ -2851,7 +2972,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gn.svg"
+    "flag": "assets/flags/4x3/gn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gw",
@@ -2882,7 +3004,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gw.svg"
+    "flag": "assets/flags/4x3/gw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gy",
@@ -2907,7 +3030,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gy.svg"
+    "flag": "assets/flags/4x3/gy.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ht",
@@ -2932,7 +3056,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ht.svg"
+    "flag": "assets/flags/4x3/ht.svg",
+    "sameFlagAs": []
   },
   {
     "code": "hm",
@@ -2968,7 +3093,10 @@
     "region": "Antarctic",
     "subregion": "",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/hm.svg"
+    "flag": "assets/flags/4x3/hm.svg",
+    "sameFlagAs": [
+      "au"
+    ]
   },
   {
     "code": "hn",
@@ -2990,7 +3118,8 @@
     "region": "Americas",
     "subregion": "Central America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/hn.svg"
+    "flag": "assets/flags/4x3/hn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "hk",
@@ -3011,7 +3140,8 @@
     "region": "Asia",
     "subregion": "Eastern Asia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/hk.svg"
+    "flag": "assets/flags/4x3/hk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "hu",
@@ -3045,7 +3175,8 @@
     "region": "Europe",
     "subregion": "Central Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/hu.svg"
+    "flag": "assets/flags/4x3/hu.svg",
+    "sameFlagAs": []
   },
   {
     "code": "is",
@@ -3076,7 +3207,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/is.svg"
+    "flag": "assets/flags/4x3/is.svg",
+    "sameFlagAs": []
   },
   {
     "code": "in",
@@ -3107,7 +3239,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/in.svg"
+    "flag": "assets/flags/4x3/in.svg",
+    "sameFlagAs": []
   },
   {
     "code": "id",
@@ -3138,7 +3271,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/id.svg"
+    "flag": "assets/flags/4x3/id.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ir",
@@ -3165,7 +3299,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ir.svg"
+    "flag": "assets/flags/4x3/ir.svg",
+    "sameFlagAs": []
   },
   {
     "code": "iq",
@@ -3190,7 +3325,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/iq.svg"
+    "flag": "assets/flags/4x3/iq.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ie",
@@ -3225,7 +3361,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ie.svg"
+    "flag": "assets/flags/4x3/ie.svg",
+    "sameFlagAs": []
   },
   {
     "code": "im",
@@ -3261,7 +3398,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/im.svg"
+    "flag": "assets/flags/4x3/im.svg",
+    "sameFlagAs": []
   },
   {
     "code": "il",
@@ -3288,7 +3426,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/il.svg"
+    "flag": "assets/flags/4x3/il.svg",
+    "sameFlagAs": []
   },
   {
     "code": "it",
@@ -3322,7 +3461,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/it.svg"
+    "flag": "assets/flags/4x3/it.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ci",
@@ -3360,7 +3500,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ci.svg"
+    "flag": "assets/flags/4x3/ci.svg",
+    "sameFlagAs": []
   },
   {
     "code": "jm",
@@ -3384,7 +3525,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/jm.svg"
+    "flag": "assets/flags/4x3/jm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "jp",
@@ -3415,7 +3557,8 @@
     "region": "Asia",
     "subregion": "Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/jp.svg"
+    "flag": "assets/flags/4x3/jp.svg",
+    "sameFlagAs": []
   },
   {
     "code": "je",
@@ -3439,7 +3582,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/je.svg"
+    "flag": "assets/flags/4x3/je.svg",
+    "sameFlagAs": []
   },
   {
     "code": "jo",
@@ -3470,7 +3614,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/jo.svg"
+    "flag": "assets/flags/4x3/jo.svg",
+    "sameFlagAs": []
   },
   {
     "code": "kz",
@@ -3506,7 +3651,8 @@
     "region": "Asia",
     "subregion": "Central Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/kz.svg"
+    "flag": "assets/flags/4x3/kz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ke",
@@ -3533,7 +3679,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ke.svg"
+    "flag": "assets/flags/4x3/ke.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ki",
@@ -3555,7 +3702,8 @@
     "region": "Oceania",
     "subregion": "Micronesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ki.svg"
+    "flag": "assets/flags/4x3/ki.svg",
+    "sameFlagAs": []
   },
   {
     "code": "xk",
@@ -3580,7 +3728,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "partially-recognised",
-    "flag": "assets/flags/4x3/xk.svg"
+    "flag": "assets/flags/4x3/xk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "kw",
@@ -3609,7 +3758,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/kw.svg"
+    "flag": "assets/flags/4x3/kw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "kg",
@@ -3645,7 +3795,8 @@
     "region": "Asia",
     "subregion": "Central Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/kg.svg"
+    "flag": "assets/flags/4x3/kg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "la",
@@ -3669,7 +3820,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/la.svg"
+    "flag": "assets/flags/4x3/la.svg",
+    "sameFlagAs": []
   },
   {
     "code": "lv",
@@ -3704,7 +3856,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/lv.svg"
+    "flag": "assets/flags/4x3/lv.svg",
+    "sameFlagAs": []
   },
   {
     "code": "lb",
@@ -3730,7 +3883,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/lb.svg"
+    "flag": "assets/flags/4x3/lb.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ls",
@@ -3753,7 +3907,8 @@
     "region": "Africa",
     "subregion": "Southern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ls.svg"
+    "flag": "assets/flags/4x3/ls.svg",
+    "sameFlagAs": []
   },
   {
     "code": "lr",
@@ -3779,7 +3934,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/lr.svg"
+    "flag": "assets/flags/4x3/lr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ly",
@@ -3809,7 +3965,8 @@
     "region": "Africa",
     "subregion": "Northern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ly.svg"
+    "flag": "assets/flags/4x3/ly.svg",
+    "sameFlagAs": []
   },
   {
     "code": "li",
@@ -3836,7 +3993,8 @@
     "region": "Europe",
     "subregion": "Western Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/li.svg"
+    "flag": "assets/flags/4x3/li.svg",
+    "sameFlagAs": []
   },
   {
     "code": "lt",
@@ -3870,7 +4028,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/lt.svg"
+    "flag": "assets/flags/4x3/lt.svg",
+    "sameFlagAs": []
   },
   {
     "code": "lu",
@@ -3901,7 +4060,8 @@
     "region": "Europe",
     "subregion": "Western Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/lu.svg"
+    "flag": "assets/flags/4x3/lu.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mo",
@@ -3928,7 +4088,8 @@
     "region": "Asia",
     "subregion": "Eastern Asia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/mo.svg"
+    "flag": "assets/flags/4x3/mo.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mg",
@@ -3954,7 +4115,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mg.svg"
+    "flag": "assets/flags/4x3/mg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mw",
@@ -3976,7 +4138,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mw.svg"
+    "flag": "assets/flags/4x3/mw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "my",
@@ -4007,7 +4170,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/my.svg"
+    "flag": "assets/flags/4x3/my.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mv",
@@ -4043,7 +4207,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mv.svg"
+    "flag": "assets/flags/4x3/mv.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ml",
@@ -4064,7 +4229,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ml.svg"
+    "flag": "assets/flags/4x3/ml.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mt",
@@ -4088,7 +4254,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mt.svg"
+    "flag": "assets/flags/4x3/mt.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mh",
@@ -4126,7 +4293,8 @@
     "region": "Oceania",
     "subregion": "Micronesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mh.svg"
+    "flag": "assets/flags/4x3/mh.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mq",
@@ -4149,7 +4317,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/mq.svg"
+    "flag": "assets/flags/4x3/mq.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mr",
@@ -4181,7 +4350,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mr.svg"
+    "flag": "assets/flags/4x3/mr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mu",
@@ -4209,7 +4379,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mu.svg"
+    "flag": "assets/flags/4x3/mu.svg",
+    "sameFlagAs": []
   },
   {
     "code": "yt",
@@ -4233,7 +4404,17 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/yt.svg"
+    "flag": "assets/flags/4x3/yt.svg",
+    "sameFlagAs": [
+      "fr",
+      "gf",
+      "gp",
+      "re",
+      "bl",
+      "mf",
+      "pm",
+      "wf"
+    ]
   },
   {
     "code": "mx",
@@ -4265,7 +4446,8 @@
     "region": "Americas",
     "subregion": "North America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mx.svg"
+    "flag": "assets/flags/4x3/mx.svg",
+    "sameFlagAs": []
   },
   {
     "code": "fm",
@@ -4300,7 +4482,8 @@
     "region": "Oceania",
     "subregion": "Micronesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/fm.svg"
+    "flag": "assets/flags/4x3/fm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "md",
@@ -4332,7 +4515,8 @@
     "region": "Europe",
     "subregion": "Eastern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/md.svg"
+    "flag": "assets/flags/4x3/md.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mc",
@@ -4356,7 +4540,8 @@
     "region": "Europe",
     "subregion": "Western Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mc.svg"
+    "flag": "assets/flags/4x3/mc.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mn",
@@ -4385,7 +4570,8 @@
     "region": "Asia",
     "subregion": "Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mn.svg"
+    "flag": "assets/flags/4x3/mn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "me",
@@ -4412,7 +4598,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/me.svg"
+    "flag": "assets/flags/4x3/me.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ms",
@@ -4432,7 +4619,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/ms.svg"
+    "flag": "assets/flags/4x3/ms.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ma",
@@ -4462,7 +4650,8 @@
     "region": "Africa",
     "subregion": "Northern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ma.svg"
+    "flag": "assets/flags/4x3/ma.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mz",
@@ -4489,7 +4678,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mz.svg"
+    "flag": "assets/flags/4x3/mz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mm",
@@ -4518,7 +4708,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mm.svg"
+    "flag": "assets/flags/4x3/mm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "na",
@@ -4545,7 +4736,8 @@
     "region": "Africa",
     "subregion": "Southern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/na.svg"
+    "flag": "assets/flags/4x3/na.svg",
+    "sameFlagAs": []
   },
   {
     "code": "nr",
@@ -4568,7 +4760,8 @@
     "region": "Oceania",
     "subregion": "Micronesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/nr.svg"
+    "flag": "assets/flags/4x3/nr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "np",
@@ -4592,7 +4785,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/np.svg"
+    "flag": "assets/flags/4x3/np.svg",
+    "sameFlagAs": []
   },
   {
     "code": "nl",
@@ -4630,7 +4824,8 @@
     "region": "Europe",
     "subregion": "Western Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/nl.svg"
+    "flag": "assets/flags/4x3/nl.svg",
+    "sameFlagAs": []
   },
   {
     "code": "nc",
@@ -4665,7 +4860,8 @@
     "region": "Oceania",
     "subregion": "Melanesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/nc.svg"
+    "flag": "assets/flags/4x3/nc.svg",
+    "sameFlagAs": []
   },
   {
     "code": "nz",
@@ -4700,7 +4896,8 @@
     "region": "Oceania",
     "subregion": "Australia and New Zealand",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/nz.svg"
+    "flag": "assets/flags/4x3/nz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ni",
@@ -4725,7 +4922,8 @@
     "region": "Americas",
     "subregion": "Central America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ni.svg"
+    "flag": "assets/flags/4x3/ni.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ne",
@@ -4749,7 +4947,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ne.svg"
+    "flag": "assets/flags/4x3/ne.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ng",
@@ -4777,7 +4976,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ng.svg"
+    "flag": "assets/flags/4x3/ng.svg",
+    "sameFlagAs": []
   },
   {
     "code": "nu",
@@ -4798,7 +4998,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/nu.svg"
+    "flag": "assets/flags/4x3/nu.svg",
+    "sameFlagAs": []
   },
   {
     "code": "nf",
@@ -4834,7 +5035,8 @@
     "region": "Oceania",
     "subregion": "Australia and New Zealand",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/nf.svg"
+    "flag": "assets/flags/4x3/nf.svg",
+    "sameFlagAs": []
   },
   {
     "code": "kp",
@@ -4876,7 +5078,8 @@
     "region": "Asia",
     "subregion": "Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/kp.svg"
+    "flag": "assets/flags/4x3/kp.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mk",
@@ -4917,7 +5120,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/mk.svg"
+    "flag": "assets/flags/4x3/mk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mp",
@@ -4955,7 +5159,8 @@
     "region": "Oceania",
     "subregion": "Micronesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/mp.svg"
+    "flag": "assets/flags/4x3/mp.svg",
+    "sameFlagAs": []
   },
   {
     "code": "no",
@@ -4993,7 +5198,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/no.svg"
+    "flag": "assets/flags/4x3/no.svg",
+    "sameFlagAs": []
   },
   {
     "code": "om",
@@ -5018,7 +5224,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/om.svg"
+    "flag": "assets/flags/4x3/om.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pk",
@@ -5044,7 +5251,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/pk.svg"
+    "flag": "assets/flags/4x3/pk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pw",
@@ -5068,7 +5276,8 @@
     "region": "Oceania",
     "subregion": "Micronesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/pw.svg"
+    "flag": "assets/flags/4x3/pw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ps",
@@ -5098,7 +5307,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "observer-state",
-    "flag": "assets/flags/4x3/ps.svg"
+    "flag": "assets/flags/4x3/ps.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pa",
@@ -5120,7 +5330,8 @@
     "region": "Americas",
     "subregion": "Central America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/pa.svg"
+    "flag": "assets/flags/4x3/pa.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pg",
@@ -5156,7 +5367,8 @@
     "region": "Oceania",
     "subregion": "Melanesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/pg.svg"
+    "flag": "assets/flags/4x3/pg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "py",
@@ -5183,7 +5395,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/py.svg"
+    "flag": "assets/flags/4x3/py.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pe",
@@ -5209,7 +5422,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/pe.svg"
+    "flag": "assets/flags/4x3/pe.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ph",
@@ -5243,7 +5457,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ph.svg"
+    "flag": "assets/flags/4x3/ph.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pn",
@@ -5279,7 +5494,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/pn.svg"
+    "flag": "assets/flags/4x3/pn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pl",
@@ -5313,7 +5529,8 @@
     "region": "Europe",
     "subregion": "Central Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/pl.svg"
+    "flag": "assets/flags/4x3/pl.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pt",
@@ -5342,7 +5559,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/pt.svg"
+    "flag": "assets/flags/4x3/pt.svg",
+    "sameFlagAs": []
   },
   {
     "code": "pr",
@@ -5368,7 +5586,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/pr.svg"
+    "flag": "assets/flags/4x3/pr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "qa",
@@ -5390,7 +5609,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/qa.svg"
+    "flag": "assets/flags/4x3/qa.svg",
+    "sameFlagAs": []
   },
   {
     "code": "cg",
@@ -5418,7 +5638,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/cg.svg"
+    "flag": "assets/flags/4x3/cg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "re",
@@ -5444,7 +5665,17 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/re.svg"
+    "flag": "assets/flags/4x3/re.svg",
+    "sameFlagAs": [
+      "fr",
+      "gf",
+      "gp",
+      "yt",
+      "bl",
+      "mf",
+      "pm",
+      "wf"
+    ]
   },
   {
     "code": "ro",
@@ -5478,7 +5709,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ro.svg"
+    "flag": "assets/flags/4x3/ro.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ru",
@@ -5513,7 +5745,8 @@
     "region": "Europe",
     "subregion": "Eastern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ru.svg"
+    "flag": "assets/flags/4x3/ru.svg",
+    "sameFlagAs": []
   },
   {
     "code": "rw",
@@ -5536,7 +5769,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/rw.svg"
+    "flag": "assets/flags/4x3/rw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "bl",
@@ -5566,7 +5800,17 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/bl.svg"
+    "flag": "assets/flags/4x3/bl.svg",
+    "sameFlagAs": [
+      "fr",
+      "gf",
+      "gp",
+      "yt",
+      "re",
+      "mf",
+      "pm",
+      "wf"
+    ]
   },
   {
     "code": "sh",
@@ -5602,7 +5846,10 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/sh.svg"
+    "flag": "assets/flags/4x3/sh.svg",
+    "sameFlagAs": [
+      "gb"
+    ]
   },
   {
     "code": "kn",
@@ -5638,7 +5885,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/kn.svg"
+    "flag": "assets/flags/4x3/kn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "lc",
@@ -5666,7 +5914,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/lc.svg"
+    "flag": "assets/flags/4x3/lc.svg",
+    "sameFlagAs": []
   },
   {
     "code": "mf",
@@ -5693,7 +5942,17 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/mf.svg"
+    "flag": "assets/flags/4x3/mf.svg",
+    "sameFlagAs": [
+      "fr",
+      "gf",
+      "gp",
+      "yt",
+      "re",
+      "bl",
+      "pm",
+      "wf"
+    ]
   },
   {
     "code": "pm",
@@ -5728,7 +5987,17 @@
     "region": "Americas",
     "subregion": "North America",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/pm.svg"
+    "flag": "assets/flags/4x3/pm.svg",
+    "sameFlagAs": [
+      "fr",
+      "gf",
+      "gp",
+      "yt",
+      "re",
+      "bl",
+      "mf",
+      "wf"
+    ]
   },
   {
     "code": "vc",
@@ -5764,7 +6033,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/vc.svg"
+    "flag": "assets/flags/4x3/vc.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ws",
@@ -5788,7 +6058,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ws.svg"
+    "flag": "assets/flags/4x3/ws.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sm",
@@ -5812,7 +6083,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sm.svg"
+    "flag": "assets/flags/4x3/sm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "st",
@@ -5850,7 +6122,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/st.svg"
+    "flag": "assets/flags/4x3/st.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sa",
@@ -5888,7 +6161,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sa.svg"
+    "flag": "assets/flags/4x3/sa.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sn",
@@ -5912,7 +6186,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sn.svg"
+    "flag": "assets/flags/4x3/sn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "rs",
@@ -5944,7 +6219,8 @@
     "region": "Europe",
     "subregion": "Southeast Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/rs.svg"
+    "flag": "assets/flags/4x3/rs.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sc",
@@ -5977,7 +6253,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sc.svg"
+    "flag": "assets/flags/4x3/sc.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sl",
@@ -6000,7 +6277,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sl.svg"
+    "flag": "assets/flags/4x3/sl.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sg",
@@ -6026,7 +6304,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sg.svg"
+    "flag": "assets/flags/4x3/sg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sx",
@@ -6051,7 +6330,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/sx.svg"
+    "flag": "assets/flags/4x3/sx.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sk",
@@ -6086,7 +6366,8 @@
     "region": "Europe",
     "subregion": "Central Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sk.svg"
+    "flag": "assets/flags/4x3/sk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "si",
@@ -6120,7 +6401,8 @@
     "region": "Europe",
     "subregion": "Central Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/si.svg"
+    "flag": "assets/flags/4x3/si.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sb",
@@ -6156,7 +6438,8 @@
     "region": "Oceania",
     "subregion": "Melanesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sb.svg"
+    "flag": "assets/flags/4x3/sb.svg",
+    "sameFlagAs": []
   },
   {
     "code": "so",
@@ -6188,7 +6471,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/so.svg"
+    "flag": "assets/flags/4x3/so.svg",
+    "sameFlagAs": []
   },
   {
     "code": "za",
@@ -6226,7 +6510,8 @@
     "region": "Africa",
     "subregion": "Southern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/za.svg"
+    "flag": "assets/flags/4x3/za.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gs",
@@ -6263,7 +6548,8 @@
     "region": "Antarctic",
     "subregion": "",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/gs.svg"
+    "flag": "assets/flags/4x3/gs.svg",
+    "sameFlagAs": []
   },
   {
     "code": "kr",
@@ -6302,7 +6588,8 @@
     "region": "Asia",
     "subregion": "Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/kr.svg"
+    "flag": "assets/flags/4x3/kr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ss",
@@ -6338,7 +6625,8 @@
     "region": "Africa",
     "subregion": "Middle Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ss.svg"
+    "flag": "assets/flags/4x3/ss.svg",
+    "sameFlagAs": []
   },
   {
     "code": "es",
@@ -6375,7 +6663,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/es.svg"
+    "flag": "assets/flags/4x3/es.svg",
+    "sameFlagAs": []
   },
   {
     "code": "lk",
@@ -6399,7 +6688,8 @@
     "region": "Asia",
     "subregion": "Southern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/lk.svg"
+    "flag": "assets/flags/4x3/lk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sd",
@@ -6427,7 +6717,8 @@
     "region": "Africa",
     "subregion": "Northern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sd.svg"
+    "flag": "assets/flags/4x3/sd.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sr",
@@ -6452,7 +6743,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sr.svg"
+    "flag": "assets/flags/4x3/sr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sj",
@@ -6489,7 +6781,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/sj.svg"
+    "flag": "assets/flags/4x3/sj.svg",
+    "sameFlagAs": []
   },
   {
     "code": "se",
@@ -6525,7 +6818,8 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/se.svg"
+    "flag": "assets/flags/4x3/se.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ch",
@@ -6562,7 +6856,8 @@
     "region": "Europe",
     "subregion": "Western Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ch.svg"
+    "flag": "assets/flags/4x3/ch.svg",
+    "sameFlagAs": []
   },
   {
     "code": "sy",
@@ -6596,7 +6891,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/sy.svg"
+    "flag": "assets/flags/4x3/sy.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tw",
@@ -6629,7 +6925,8 @@
     "region": "Asia",
     "subregion": "Eastern Asia",
     "sovereignty": "partially-recognised",
-    "flag": "assets/flags/4x3/tw.svg"
+    "flag": "assets/flags/4x3/tw.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tj",
@@ -6666,7 +6963,8 @@
     "region": "Asia",
     "subregion": "Central Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tj.svg"
+    "flag": "assets/flags/4x3/tj.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tz",
@@ -6697,7 +6995,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tz.svg"
+    "flag": "assets/flags/4x3/tz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "th",
@@ -6732,7 +7031,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/th.svg"
+    "flag": "assets/flags/4x3/th.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tl",
@@ -6773,7 +7073,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tl.svg"
+    "flag": "assets/flags/4x3/tl.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tg",
@@ -6796,7 +7097,8 @@
     "region": "Africa",
     "subregion": "Western Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tg.svg"
+    "flag": "assets/flags/4x3/tg.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tk",
@@ -6820,7 +7122,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/tk.svg"
+    "flag": "assets/flags/4x3/tk.svg",
+    "sameFlagAs": []
   },
   {
     "code": "to",
@@ -6841,7 +7144,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/to.svg"
+    "flag": "assets/flags/4x3/to.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tt",
@@ -6875,7 +7179,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tt.svg"
+    "flag": "assets/flags/4x3/tt.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tn",
@@ -6908,7 +7213,8 @@
     "region": "Africa",
     "subregion": "Northern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tn.svg"
+    "flag": "assets/flags/4x3/tn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tr",
@@ -6945,7 +7251,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tr.svg"
+    "flag": "assets/flags/4x3/tr.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tm",
@@ -6971,7 +7278,8 @@
     "region": "Asia",
     "subregion": "Central Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tm.svg"
+    "flag": "assets/flags/4x3/tm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tc",
@@ -7006,7 +7314,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/tc.svg"
+    "flag": "assets/flags/4x3/tc.svg",
+    "sameFlagAs": []
   },
   {
     "code": "tv",
@@ -7025,7 +7334,8 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/tv.svg"
+    "flag": "assets/flags/4x3/tv.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ug",
@@ -7049,7 +7359,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ug.svg"
+    "flag": "assets/flags/4x3/ug.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ua",
@@ -7078,7 +7389,8 @@
     "region": "Europe",
     "subregion": "Eastern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ua.svg"
+    "flag": "assets/flags/4x3/ua.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ae",
@@ -7113,7 +7425,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ae.svg"
+    "flag": "assets/flags/4x3/ae.svg",
+    "sameFlagAs": []
   },
   {
     "code": "gb",
@@ -7150,7 +7463,10 @@
     "region": "Europe",
     "subregion": "Northern Europe",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/gb.svg"
+    "flag": "assets/flags/4x3/gb.svg",
+    "sameFlagAs": [
+      "sh"
+    ]
   },
   {
     "code": "us",
@@ -7186,7 +7502,8 @@
     "region": "Americas",
     "subregion": "North America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/us.svg"
+    "flag": "assets/flags/4x3/us.svg",
+    "sameFlagAs": []
   },
   {
     "code": "um",
@@ -7222,7 +7539,8 @@
     "region": "Americas",
     "subregion": "North America",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/um.svg"
+    "flag": "assets/flags/4x3/um.svg",
+    "sameFlagAs": []
   },
   {
     "code": "vi",
@@ -7259,7 +7577,8 @@
     "region": "Americas",
     "subregion": "Caribbean",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/vi.svg"
+    "flag": "assets/flags/4x3/vi.svg",
+    "sameFlagAs": []
   },
   {
     "code": "uy",
@@ -7285,7 +7604,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/uy.svg"
+    "flag": "assets/flags/4x3/uy.svg",
+    "sameFlagAs": []
   },
   {
     "code": "uz",
@@ -7314,7 +7634,8 @@
     "region": "Asia",
     "subregion": "Central Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/uz.svg"
+    "flag": "assets/flags/4x3/uz.svg",
+    "sameFlagAs": []
   },
   {
     "code": "vu",
@@ -7336,7 +7657,8 @@
     "region": "Oceania",
     "subregion": "Melanesia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/vu.svg"
+    "flag": "assets/flags/4x3/vu.svg",
+    "sameFlagAs": []
   },
   {
     "code": "va",
@@ -7371,7 +7693,8 @@
     "region": "Europe",
     "subregion": "Southern Europe",
     "sovereignty": "observer-state",
-    "flag": "assets/flags/4x3/va.svg"
+    "flag": "assets/flags/4x3/va.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ve",
@@ -7396,7 +7719,8 @@
     "region": "Americas",
     "subregion": "South America",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ve.svg"
+    "flag": "assets/flags/4x3/ve.svg",
+    "sameFlagAs": []
   },
   {
     "code": "vn",
@@ -7423,7 +7747,8 @@
     "region": "Asia",
     "subregion": "South-Eastern Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/vn.svg"
+    "flag": "assets/flags/4x3/vn.svg",
+    "sameFlagAs": []
   },
   {
     "code": "wf",
@@ -7458,7 +7783,17 @@
     "region": "Oceania",
     "subregion": "Polynesia",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/wf.svg"
+    "flag": "assets/flags/4x3/wf.svg",
+    "sameFlagAs": [
+      "fr",
+      "gf",
+      "gp",
+      "yt",
+      "re",
+      "bl",
+      "mf",
+      "pm"
+    ]
   },
   {
     "code": "eh",
@@ -7494,7 +7829,8 @@
     "region": "Africa",
     "subregion": "Northern Africa",
     "sovereignty": "territory",
-    "flag": "assets/flags/4x3/eh.svg"
+    "flag": "assets/flags/4x3/eh.svg",
+    "sameFlagAs": []
   },
   {
     "code": "ye",
@@ -7520,7 +7856,8 @@
     "region": "Asia",
     "subregion": "Western Asia",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/ye.svg"
+    "flag": "assets/flags/4x3/ye.svg",
+    "sameFlagAs": []
   },
   {
     "code": "zm",
@@ -7546,7 +7883,8 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/zm.svg"
+    "flag": "assets/flags/4x3/zm.svg",
+    "sameFlagAs": []
   },
   {
     "code": "zw",
@@ -7570,6 +7908,7 @@
     "region": "Africa",
     "subregion": "Eastern Africa",
     "sovereignty": "un-member",
-    "flag": "assets/flags/4x3/zw.svg"
+    "flag": "assets/flags/4x3/zw.svg",
+    "sameFlagAs": []
   }
 ]

@@ -3,7 +3,7 @@
  * the flag, so every future mode reuses this whole screen.
  */
 import { MODE_BY_ID } from '../registry.js';
-import { countriesInScope, flagUrl, SCOPES, DEFAULT_SCOPE } from '../data.js';
+import { countriesInScope, flagUrl, loadColours, SCOPES, DEFAULT_SCOPE } from '../data.js';
 import { buildRound, Round, verdictFor } from '../engine.js';
 import { buildIndex, suggest, judge, MIN_SUGGEST_CHARS } from '../matching.js';
 
@@ -33,6 +33,20 @@ function writeSetting(key, value) {
   } catch {
     /* the choice just will not persist */
   }
+}
+
+/**
+ * A pie as a single conic gradient: crisp at any size, no canvas, no library.
+ * Starts at twelve o'clock, biggest slice first.
+ */
+function pieGradient(colours) {
+  let at = 0;
+  const stops = colours.map((c) => {
+    const from = at * 100;
+    at += c.share;
+    return `${c.hex} ${from.toFixed(3)}% ${(at * 100).toFixed(3)}%`;
+  });
+  return `conic-gradient(from -90deg, ${stops.join(', ')})`;
 }
 
 const escapeHtml = (s) =>
@@ -68,8 +82,35 @@ export async function renderQuiz(root, modeId) {
     return;
   }
 
+  const needsColours = mode.stage === 'pie' || mode.ambiguity === 'palette';
+  let colourData = null;
+  if (needsColours) {
+    try {
+      colourData = await loadColours();
+    } catch (err) {
+      root.innerHTML = `
+        <section class="panel panel--centred">
+          <h1 class="panel__title">Could not load the colour data</h1>
+          <p class="panel__text">${escapeHtml(err.message)}</p>
+        </section>`;
+      return;
+    }
+  }
+
+  /**
+   * Which other countries count as the same answer here.
+   *
+   * In a colour mode that is every flag with the same palette; everywhere else
+   * it is only the flags that are literally identical, like France and its
+   * overseas territories.
+   */
+  const equivalentsOf = (country) =>
+    mode.ambiguity === 'palette'
+      ? (colourData.twins[country.code] ?? [])
+      : (country.sameFlagAs ?? []);
+
   const index = buildIndex(pool);
-  const round = new Round(buildRound(pool));
+  const round = new Round(buildRound(pool, { equivalentsOf }));
   let locked = false;
 
   const settings = (key, current, options) => `
@@ -100,6 +141,10 @@ export async function renderQuiz(root, modeId) {
 
       <div class="stage">
         <figure class="stage__figure" style="--mode-filter:${mode.filter ?? 'none'}">
+          <div class="stage__pie" data-pie hidden>
+            <div class="stage__disc" data-disc role="img"
+                 aria-label="A pie chart of the flag's colours"></div>
+          </div>
           <img class="stage__flag" data-flag alt="The flag to identify">
           <figcaption class="stage__reveal" data-reveal hidden>
             <img class="stage__reveal-flag" data-reveal-flag alt="">
@@ -129,6 +174,8 @@ export async function renderQuiz(root, modeId) {
     reveal: root.querySelector('[data-reveal]'),
     revealFlag: root.querySelector('[data-reveal-flag]'),
     revealName: root.querySelector('[data-reveal-name]'),
+    pie: root.querySelector('[data-pie]'),
+    disc: root.querySelector('[data-disc]'),
     figure: root.querySelector('.stage__figure'),
   };
 
@@ -143,6 +190,12 @@ export async function renderQuiz(root, modeId) {
   function settle({ correct, named }) {
     const answer = round.question.answer;
 
+    // In pie mode the flag has been hidden all along; the reveal is the moment
+    // the chart turns back into the thing it was measured from.
+    if (mode.stage === 'pie') {
+      el.pie.hidden = true;
+      el.flag.hidden = false;
+    }
     el.figure.classList.add('is-revealed');
     el.figure.classList.toggle('was-wrong', !correct);
     el.revealFlag.src = flagUrl(answer);
@@ -176,12 +229,13 @@ export async function renderQuiz(root, modeId) {
       locked = true;
 
       const answer = round.question.answer;
+      const accept = new Set([answer.code, ...round.question.equivalents]);
       const chosen = round.question.options.find((c) => c.code === button.dataset.code);
-      const { correct } = round.answer(chosen);
+      const { correct } = round.answer(chosen, { correct: accept.has(chosen.code) });
 
       for (const b of el.answer.querySelectorAll('.option')) {
         b.disabled = true;
-        if (b.dataset.code === answer.code) b.classList.add('option--correct');
+        if (accept.has(b.dataset.code)) b.classList.add('option--correct');
         else if (b === button) b.classList.add('option--wrong');
       }
       settle({ correct, named: chosen });
@@ -256,24 +310,35 @@ export async function renderQuiz(root, modeId) {
       closeList();
 
       const answer = round.question.answer;
+      const accept = new Set([answer.code, ...round.question.equivalents]);
       const verdict = judge(index, value, answer);
-      round.answer(verdict.named, { correct: verdict.correct, typed: value });
+
+      // Naming a twin is a fair answer to this question, not a near miss.
+      const viaTwin =
+        !verdict.correct && verdict.named != null && accept.has(verdict.named.code);
+      const correct = verdict.correct || viaTwin;
+      round.answer(verdict.named, { correct, typed: value });
 
       input.disabled = true;
-      input.value = verdict.correct ? answer.name : value;
-      input.classList.add(verdict.correct ? 'is-correct' : 'is-wrong');
+      input.value = correct ? (verdict.named ?? answer).name : value;
+      input.classList.add(correct ? 'is-correct' : 'is-wrong');
       // Hidden rather than disabled: a greyed-out "Answer" next to a live
       // "Next" reads as two competing actions.
       form.querySelector('[data-skip]').hidden = true;
       form.querySelector('.typer__submit').hidden = true;
 
-      if (!verdict.correct) {
+      if (viaTwin) {
+        feedback.textContent = `Also accepted - ${verdict.named.name} makes the same pie as ${answer.name}.`;
+        feedback.className = 'typer__feedback typer__feedback--ok';
+        feedback.hidden = false;
+      } else if (!correct) {
         feedback.textContent = verdict.named
           ? `That is ${verdict.named.name}.`
           : 'Not a country we recognised.';
+        feedback.className = 'typer__feedback';
         feedback.hidden = false;
       }
-      settle(verdict);
+      settle({ correct, named: verdict.named });
     };
 
     input.addEventListener('input', () => {
@@ -336,6 +401,12 @@ export async function renderQuiz(root, modeId) {
     el.reveal.hidden = true;
     el.next.hidden = true;
     el.flag.src = flagUrl(round.question.answer);
+
+    if (mode.stage === 'pie') {
+      el.disc.style.background = pieGradient(colourData.flags[round.question.answer.code]);
+      el.pie.hidden = false;
+      el.flag.hidden = true;
+    }
 
     paintMeters();
     if (answerMode === 'type') paintInput();

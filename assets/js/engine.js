@@ -27,8 +27,8 @@ function shuffle(items) {
  * until palette-collision data exists, which will let us pick the flags that
  * actually look alike.
  */
-function pickDistractors(answer, pool, count) {
-  const others = pool.filter((c) => c.code !== answer.code);
+function pickDistractors(answer, pool, count, excluded) {
+  const others = pool.filter((c) => c.code !== answer.code && !excluded.has(c.code));
   const sameRegion = shuffle(others.filter((c) => c.region && c.region === answer.region));
   const chosen = sameRegion.slice(0, count);
 
@@ -49,17 +49,26 @@ function pickDistractors(answer, pool, count) {
  * Builds a round of questions. Answers are distinct within a round, so the
  * same flag never comes up twice.
  */
-export function buildRound(pool, { length = ROUND_LENGTH } = {}) {
+export function buildRound(pool, { length = ROUND_LENGTH, equivalentsOf = () => [] } = {}) {
   if (pool.length < OPTIONS_PER_QUESTION) {
     throw new Error('Not enough countries in scope to build a round');
   }
   const answers = shuffle(pool).slice(0, Math.min(length, pool.length));
 
-  return answers.map((answer, index) => ({
-    index,
-    answer,
-    options: shuffle([answer, ...pickDistractors(answer, pool, OPTIONS_PER_QUESTION - 1)]),
-  }));
+  return answers.map((answer, index) => {
+    // Anything indistinguishable from the answer in this mode would be a
+    // second correct option, so it can never be offered as a wrong one.
+    const equivalents = new Set(equivalentsOf(answer));
+    return {
+      index,
+      answer,
+      equivalents,
+      options: shuffle([
+        answer,
+        ...pickDistractors(answer, pool, OPTIONS_PER_QUESTION - 1, equivalents),
+      ]),
+    };
+  });
 }
 
 /** Tracks progress and score across a round. */

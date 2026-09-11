@@ -6,9 +6,12 @@
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "build:flags": "node scripts/build-flags.mjs"
+    "build:flags": "node scripts/build-flags.mjs",
+    "build:colors": "node scripts/build-colors.mjs",
+    "build": "npm run build:flags && npm run build:colors"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "flag-icons": "7.5.0",
     "world-countries": "5.1.0"
   }

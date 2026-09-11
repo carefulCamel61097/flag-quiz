@@ -13,6 +13,7 @@
  * Run with: npm run build:flags
  */
 import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -83,6 +84,34 @@ for (const c of worldCountries) {
 
 countries.sort((a, b) => a.name.localeCompare(b.name, 'en'));
 
+/**
+ * Some countries share a flag exactly.
+ *
+ * Every French overseas territory uses the French tricolour, Heard Island uses
+ * Australia's, and Saint Helena uses the Union Jack - thirteen flags in three
+ * groups. Shown one of them, a quiz has several equally correct answers, so
+ * each country needs to know its doubles: they must all be accepted, and two
+ * of them must never appear as options in the same question.
+ *
+ * The `id` attribute is the only difference between otherwise identical files,
+ * so it is stripped before hashing.
+ */
+const byArt = new Map();
+for (const country of countries) {
+  const art = readFileSync(join(root, country.flag), 'utf8')
+    .replace(/id="flag-icons-[a-z-]+"/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const key = createHash('sha1').update(art).digest('hex');
+  if (!byArt.has(key)) byArt.set(key, []);
+  byArt.get(key).push(country.code);
+}
+for (const country of countries) {
+  const group = [...byArt.values()].find((g) => g.includes(country.code));
+  country.sameFlagAs = group.filter((code) => code !== country.code);
+}
+const shared = [...byArt.values()].filter((g) => g.length > 1);
+
 // Copy the SVGs fresh each run so removed upstream entries do not linger.
 const outDir = join(root, 'assets', 'flags', '4x3');
 rmSync(outDir, { recursive: true, force: true });
@@ -117,4 +146,7 @@ const byTier = countries.reduce((acc, c) => ({ ...acc, [c.sovereignty]: (acc[c.s
 console.log(`Wrote ${readdirSync(outDir).length} flags to assets/flags/4x3/`);
 console.log(`Wrote ${countries.length} countries to data/countries.json`);
 console.log('By sovereignty:', byTier);
+console.log(
+  `Identical flags: ${shared.length} group(s) covering ${shared.reduce((n, g) => n + g.length, 0)} countries`
+);
 if (missing.length) console.warn('No flag found for:', missing.join(', '));
