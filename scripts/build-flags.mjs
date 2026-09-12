@@ -112,6 +112,67 @@ for (const country of countries) {
 }
 const shared = [...byArt.values()].filter((g) => g.length > 1);
 
+/**
+ * How prominent each country is, used to cut the quiz down to better-known
+ * flags. Reads the snapshot in data/fame.json; see scripts/build-fame.mjs.
+ *
+ * Two signals, because neither works alone. Wikipedia traffic on its own
+ * measures how often a country is looked up, which tourism and news drive more
+ * than familiarity does - it put Mauritius and Monaco above Belgium and
+ * Greece. Population on its own puts Burkina Faso above Denmark. Weighted 70/30
+ * towards traffic, the pair behaves much more like prominence than either does
+ * by itself.
+ *
+ * Both are logged first: India has 200 times the population of Iceland, but
+ * its flag is not 200 times better known.
+ */
+const VIEW_WEIGHT = 0.7;
+
+const famePath = join(root, 'data', 'fame.json');
+let fame = null;
+try {
+  fame = JSON.parse(readFileSync(famePath, 'utf8'));
+} catch {
+  console.warn('No data/fame.json - countries will have no prominence ranking.');
+}
+
+if (fame) {
+  const scored = countries.filter((c) => fame.views[c.code] != null);
+  const log = (n) => Math.log10(Math.max(n ?? 1, 1));
+  const viewLogs = scored.map((c) => log(fame.views[c.code]));
+  const popLogs = scored
+    .filter((c) => fame.population[c.code] != null)
+    .map((c) => log(fame.population[c.code]));
+  const vMin = Math.min(...viewLogs);
+  const vMax = Math.max(...viewLogs);
+  const pMin = Math.min(...popLogs);
+  const pMax = Math.max(...popLogs);
+
+  for (const country of countries) {
+    const views = fame.views[country.code];
+    if (views == null) {
+      country.prominence = null;
+      continue;
+    }
+    const v = (log(views) - vMin) / (vMax - vMin);
+    // With no population figure, traffic stands alone rather than dragging the
+    // country to the bottom of the table.
+    const pop = fame.population[country.code];
+    const p = pop == null ? v : (log(pop) - pMin) / (pMax - pMin);
+    country.prominence = Number((VIEW_WEIGHT * v + (1 - VIEW_WEIGHT) * p).toFixed(4));
+  }
+
+  // Rank runs over UN members only: the tiers are cut from that list, and
+  // mixing territories in would push real countries down the table.
+  const ranked = countries
+    .filter((c) => c.sovereignty === 'un-member' && c.prominence != null)
+    .sort((a, b) => b.prominence - a.prominence);
+  ranked.forEach((country, i) => {
+    country.fameRank = i + 1;
+  });
+  for (const country of countries) country.fameRank ??= null;
+}
+
 // Copy the SVGs fresh each run so removed upstream entries do not linger.
 const outDir = join(root, 'assets', 'flags', '4x3');
 rmSync(outDir, { recursive: true, force: true });
@@ -149,4 +210,11 @@ console.log('By sovereignty:', byTier);
 console.log(
   `Identical flags: ${shared.length} group(s) covering ${shared.reduce((n, g) => n + g.length, 0)} countries`
 );
+if (fame) {
+  const ranked = countries.filter((c) => c.fameRank).sort((a, b) => a.fameRank - b.fameRank);
+  console.log(`Ranked ${ranked.length} UN members by prominence`);
+  console.log('  most:', ranked.slice(0, 6).map((c) => c.name).join(', '));
+  console.log('  at 60:', ranked[59]?.name, '| at 130:', ranked[129]?.name);
+  console.log('  least:', ranked.slice(-4).map((c) => c.name).join(', '));
+}
 if (missing.length) console.warn('No flag found for:', missing.join(', '));

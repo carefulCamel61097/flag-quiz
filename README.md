@@ -87,6 +87,7 @@ the published site needs no network calls and no build step of its own.
 | --- | --- | --- |
 | Flag SVGs | [lipis/flag-icons](https://github.com/lipis/flag-icons) `7.5.0` | MIT |
 | Country names, capitals, regions, UN membership | [mledoze/countries](https://github.com/mledoze/countries) (`world-countries` `5.1.0`) | ODbL-1.0 |
+| Country prominence | English Wikipedia pageviews + World Bank population | CC BY-SA / CC BY |
 
 `flag-icons` was chosen over the alternatives because it is curated for
 consistency rather than scraped: every flag is a clean SVG on a uniform
@@ -131,7 +132,7 @@ hand-maintained synonym list.
 
 ```bash
 npm install
-npm run build        # flags and country data, then colour measurement
+npm run build        # prominence, then flags and country data, then colours
 ```
 
 [`scripts/build-flags.mjs`](scripts/build-flags.mjs) copies the 4:3 SVGs into
@@ -144,6 +145,10 @@ upstream changes.
 flag and writes `data/flag-colors.json`. It takes about two minutes, and needs
 `@resvg/resvg-js` — a build-time dependency only, never shipped to the
 browser.
+
+[`scripts/build-fame.mjs`](scripts/build-fame.mjs) is the only script that
+touches the network, and it skips itself when `data/fame.json` already exists.
+Pass `--refresh` to re-fetch.
 
 ## How the colour analysis works
 
@@ -271,6 +276,68 @@ a rotated sampling grid. Rotation is especially valuable against horizontal
 tricolours, where an axis-aligned crop is often a flat band of one colour but
 an angled one cuts across a boundary and carries real information.
 
+## Which flags a quiz uses
+
+Four selections, cumulative, so widening adds unfamiliar flags rather than
+swapping the familiar ones out:
+
+| Selection | Flags |
+| --- | --- |
+| 60 best known | The countries that come up most |
+| 130 best known | Two thirds of the world, familiar first |
+| All 193 countries | Every UN member, down to Tuvalu and Nauru |
+| All 250 flags | Adds territories: Greenland, Hong Kong, Puerto Rico |
+
+### Not "Easy, Medium, Hard"
+
+They are named for what they are. Difficulty is still unmeasured, and
+labelling a set "Easy" would be the same invented claim the mode cards used to
+make before the labels came out. What *is* measured is prominence, which is a
+different thing: how much a country is in the world's attention, not how
+recognisable its flag is.
+
+### How prominence is measured
+
+Two signals, blended 70/30, both on a log scale:
+
+**English Wikipedia traffic**, median monthly views over twelve months
+([`scripts/build-fame.mjs`](scripts/build-fame.mjs) snapshots this into
+`data/fame.json`, so builds never touch the network).
+
+**Population**, from the World Bank.
+
+Neither works alone, which is the whole reason for blending:
+
+- On traffic alone, Mauritius and Monaco outranked Belgium and Greece. Looking
+  a country up is driven by tourism, migration and news, not by familiarity.
+- On population alone, Burkina Faso and Madagascar outranked Denmark and
+  Ireland.
+
+Log scale because both distributions are heavy-tailed: India has 200 times the
+population of Iceland, but its flag is not 200 times better known. The 70/30
+weighting was picked by scoring candidate weights against a checklist of flags
+a general audience plausibly does and does not know, and taking the best.
+
+Three things went wrong while building this, all worth remembering:
+
+- **The median, not the total.** Summing twelve months lets one news month
+  swamp a year: Cape Verde drew 3.8M views in a single month against a 150k
+  baseline, which put it above the United Kingdom. The most recent month also
+  comes back near zero because it is still being aggregated. The median is
+  immune to both.
+- **Redirects and disambiguation pages measure nothing.** Pageviews count the
+  exact title asked for, so "Czechia" returns the traffic on a redirect stub
+  rather than the article. Worse, "Georgia" is a disambiguation page: the
+  country ranked dead last out of 193 until it was caught. The build now
+  resolves redirects first and *fails* if any title is a disambiguation page.
+- **Never swallow a fetch error.** The first run returned zero views for 73
+  rate-limited countries and produced a ranking that looked entirely
+  plausible. Silent zeros are worse than a crash. The build now retries, and
+  refuses to write a ranking with holes in it.
+
+The honest summary: this is the least bad *computable* stand-in. It is not
+what the tiers should eventually be cut from - that is play data, below.
+
 ## Difficulty
 
 There are no difficulty labels in the app. There were briefly — Easy, Medium,
@@ -341,6 +408,34 @@ small endpoint on something free — a Cloudflare Worker with KV, or Supabase �
 which stays compatible with GitHub Pages hosting. Anything collected from
 other people needs a plain word about it in the interface first.
 
+## Future option: combining transforms
+
+Modes are single transforms today. They could stack: the colour pie drawn in
+inverted colours, a zoomed crop of a greyscale flag, a blurred mosaic. Most of
+these are close to free, since the pieces already exist.
+
+Two things to get right first.
+
+**Combinations must be a modifier, not new entries.** Twenty-one modes pair
+into more than two hundred, and a registry listing all of them would bury the
+site in exactly the clutter the current structure avoids. A stack belongs as a
+toggle on a mode - a "twist" - so the hub still lists twenty-one things.
+
+**Ambiguity does not compose automatically.** Each mode knows which countries
+are indistinguishable under it, and stacking changes that:
+
+- *Inversion preserves it exactly.* Inverting is a bijection on colours, so two
+  identical palettes stay identical and two different ones stay different. An
+  inverted pie has precisely the same twins as a normal pie - the existing data
+  works unchanged.
+- *Greyscale does not.* It collapses every colour of equal luminance onto one
+  grey, so a greyscale pie has strictly more twins than a colour pie, and some
+  flags that are currently distinguishable stop being so.
+
+So a stack either inherits its ambiguity data, or needs its own computed.
+Getting that wrong means marking fair answers wrong, which is the failure this
+project has already had to fix twice.
+
 ## A note on cheating
 
 Flags are served as `assets/flags/4x3/<iso-code>.svg`, so the answer is
@@ -367,8 +462,10 @@ assets/js/views/quiz.js       the play screen (shared by every mode)
 assets/flags/4x3/*.svg        250 flags, generated
 data/countries.json           250 country records, generated
 data/flag-colors.json         measured palettes and palette twins, generated
+data/fame.json                Wikipedia and population snapshot, generated
 data/sources.json             upstream package versions
-scripts/build-flags.mjs       flags and country data
+scripts/build-fame.mjs        prominence snapshot (the only script that fetches)
+scripts/build-flags.mjs       flags, country data, prominence ranking
 scripts/build-colors.mjs      colour measurement and twin detection
 scripts/serve.mjs             local dev server, no dependencies
 ```
@@ -449,6 +546,7 @@ npm start        # http://localhost:4173
 - [x] Colour extraction into `data/flag-colors.json`
 - [x] Identical-flag and palette-twin detection, with twin-aware grading
 - [x] Mode 4, colour pie
+- [x] Prominence ranking, and four flag selections cut from it
 - [ ] Crop analysis into `data/flag-crops.json`, thresholds tuned by eye
 - [ ] Mode 3, zoomed
 - [ ] Modes 5-7: low-res mosaic, blur reveal, real or fake
@@ -456,6 +554,7 @@ npm start        # http://localhost:4173
 - [ ] Difficulty weighting and palette-collision distractors
 - [ ] Strong follow-ups (modes 7-12)
 - [ ] Angled crops (45°, -45°, 90°, -90°)
+- [ ] Combining transforms as a "twist" modifier
 
 ## Licence
 

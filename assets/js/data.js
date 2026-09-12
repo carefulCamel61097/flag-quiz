@@ -8,29 +8,46 @@
 
 const url = (path) => new URL(path, document.baseURI).href;
 
-/** Scopes a quiz can be played over. */
+/**
+ * Which flags a quiz draws from.
+ *
+ * These are named for what they *are* - a slice of the countries ranked by
+ * prominence - rather than Easy, Medium and Hard. Prominence is measured
+ * (Wikipedia traffic blended with population, see scripts/build-flags.mjs);
+ * difficulty is not measured yet, and labelling a set "Easy" would be the same
+ * invented claim the mode cards used to make.
+ *
+ * The tiers are cumulative: the wider ones contain the narrower ones, so
+ * moving up adds unfamiliar flags rather than swapping the familiar ones out.
+ */
 export const SCOPES = {
+  known60: {
+    id: 'known60',
+    label: '60 best known',
+    note: 'The countries that come up most.',
+    match: (c) => c.sovereignty === 'un-member' && c.fameRank != null && c.fameRank <= 60,
+  },
+  known130: {
+    id: 'known130',
+    label: '130 best known',
+    note: 'Two thirds of the world, familiar ones first.',
+    match: (c) => c.sovereignty === 'un-member' && c.fameRank != null && c.fameRank <= 130,
+  },
   un: {
     id: 'un',
-    label: '193 UN members',
-    note: 'The standard set. Every sovereign country.',
+    label: 'All 193 countries',
+    note: 'Every UN member, down to Tuvalu and Nauru.',
     match: (c) => c.sovereignty === 'un-member',
-  },
-  sovereign: {
-    id: 'sovereign',
-    label: '197 states',
-    note: 'UN members, plus observer states and partially recognised ones.',
-    match: (c) => c.sovereignty !== 'territory',
   },
   all: {
     id: 'all',
     label: 'All 250 flags',
-    note: 'Includes territories: Greenland, Hong Kong, Puerto Rico and friends.',
+    note: 'Adds territories: Greenland, Hong Kong, Puerto Rico and friends.',
     match: () => true,
   },
 };
 
-export const DEFAULT_SCOPE = 'un';
+export const DEFAULT_SCOPE = 'known130';
 
 let cache = null;
 
