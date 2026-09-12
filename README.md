@@ -10,9 +10,9 @@ name the country.
 Because every game mode is just a transform over the same 250 SVGs, adding a
 new mode costs one function, not 250 pieces of content.
 
-Status: **playable** — three modes are live (Classic, Inverted, Colour Pie),
-with free-text or multiple-choice answers. The other eighteen are listed as
-planned. See [Roadmap](#roadmap).
+Status: **playable** — four modes are live (Classic, Zoomed, Inverted, Colour
+Pie), with free-text or multiple-choice answers. The other seventeen are
+listed as planned. See [Roadmap](#roadmap).
 
 ## Game modes
 
@@ -27,7 +27,7 @@ crop pipelines already exist.
 | --- | --- | --- | --- | --- |
 | 1 | **Classic** | The flag, untouched. The quiz everyone expects to find, and the baseline every other mode is measured against. | High | Built |
 | 2 | **Inverted** | The flag with RGB values inverted. Red becomes cyan, white becomes black. Surprisingly hard, and instantly recognisable once it clicks. | High | Built |
-| 3 | **Zoomed** | A small crop blown up. The classic format, and the most immediately understandable. | High | Medium — needs the crop pipeline below |
+| 3 | **Zoomed** | A small crop blown up. The classic format, and the most immediately understandable. | High | Built |
 | 4 | **Colour pie** | A pie chart of the flag's colours, sized by how much of the flag each covers. No shapes, no layout — just the palette and its proportions. | High | Built |
 | 5 | **Low-res mosaic** | The flag downsampled to an N×M block grid. Difficulty is a single integer, which makes this the cleanest difficulty dial in the set and a natural progressive-reveal mode. | High | Low |
 | 6 | **Blur reveal** | Starts heavily blurred and sharpens on a timer. Points decay as it gets easier. | High | Low |
@@ -132,7 +132,7 @@ hand-maintained synonym list.
 
 ```bash
 npm install
-npm run build        # prominence, then flags and country data, then colours
+npm run build        # prominence, flags, country data, colours, crops
 ```
 
 [`scripts/build-flags.mjs`](scripts/build-flags.mjs) copies the 4:3 SVGs into
@@ -228,53 +228,74 @@ What the quiz does with it:
 - No two equivalents are ever offered in the same multiple-choice question,
   so there is never a second correct option to pick from.
 
-The same reasoning is what the [zoom crop pipeline](#how-the-zoom-crops-will-work)
-will need, and this is the first place it has been built.
+The same reasoning drives [crop selection](#how-the-zoom-crops-work) for the
+Zoomed quiz, where a crop that could belong to several flags accepts any of
+them.
 
-## How the zoom crops will work
+## How the zoom crops work
 
-A randomly placed crop has a failure mode that is worse than being too hard:
-it can be **unanswerable**. A solid red square cropped from Japan is not a
-difficult question, because that same crop appears in China, Turkey, Morocco,
-Switzerland and roughly eighty others. There is no correct answer to give.
+A randomly placed crop has a worse failure mode than being hard: it can be
+**unanswerable**. A solid red square cropped from Japan also appears in China,
+Turkey, Morocco and Switzerland, so there is no correct answer to give.
+Difficulty and ambiguity are different things, and only the second one can be
+measured against the corpus.
 
-Difficulty and ambiguity are separate axes, and the second one is measurable
-against the corpus. At build time:
+[`scripts/build-crops.mjs`](scripts/build-crops.mjs) does that at build time:
 
-1. Rasterise all 250 flags small (64×48 is enough).
-2. Enumerate candidate crops on a sliding grid — a few hundred per flag,
-   **at several sizes**, since crop size is itself a difficulty axis rather
-   than a single value to commit to up front.
-3. Give each crop a cheap signature: a downsampled colour vector, or a
-   perceptual hash.
-4. For each crop, count how many *other* flags contain a near-identical crop
-   anywhere in them.
+1. Rasterise every flag small, with crisp edges.
+2. Enumerate candidate crops on a sliding grid **at three sizes**, since crop
+   size is itself a difficulty axis rather than one value to commit to.
+3. Reduce each crop to a 4x4 grid of average colours - its signature.
+4. Throw away anything close to flat. A crop of one colour carries nothing.
+5. For each survivor, count how many *other* flags contain a near-identical
+   crop anywhere in them.
 
-That collision count is the difficulty score:
+That count is the difficulty, and it is what makes the question answerable.
+2,956 crops are kept, twelve per flag, evenly split across the three sizes.
+Around 95% collide with nothing at all.
 
-| Collisions | Meaning | Use |
-| --- | --- | --- |
-| 0 | Unique in the world — the maple leaf, the Brazilian globe | Easy and medium tiers |
-| 1–3 | Narrows it to a handful | Hard tier, **multiple choice only** |
-| Many | A solid colour field carrying no information | Discard, never serve |
+### A crop that matches other flags is shared, not discarded
 
-The payoff is a guarantee that every free-text question is solvable, which
-random cropping cannot offer. The ambiguous middle tier is not wasted either:
-a crop matching three flags is a fair multiple-choice question as long as the
-distractors exclude the other two, and that is the hardest question type in
-the whole game.
+Where a crop does match, the flags it matches become **accepted answers**,
+exactly as palette twins do in the colour pie. A crop of a red-white boundary
+really could be the Netherlands or Russia or Slovakia, and saying so is more
+honest than marking one of them wrong. Those flags are also never offered as
+wrong options in the same multiple-choice question.
 
-The thresholds here are guesses. Crop sizes, the similarity cutoff and the
-tier boundaries all want tuning against real output before they are trusted.
+Two flags are dropped from this mode entirely: **Indonesia and Poland** are
+plain bicolours, and every region of them looks like a region of half a dozen
+other flags. There is no fair question to ask, so the mode does not ask one.
+
+### Four things that had to be tuned
+
+**Identical flags must not count as collisions.** France shares its artwork
+with eight overseas territories, so every crop of the tricolour matched eight
+others and France dropped out of the quiz altogether. Those eight are already
+accepted answers through the identical-flag handling, so they were never
+competing answers at all.
+
+**The sameness threshold was far too strict at first.** Chad and Romania never
+collided, even though a crop of either shows a blue-yellow boundary and the
+two blues are only telling apart side by side. Loosening it to roughly the
+palette-twin threshold fixed it.
+
+**Sorting on answerability alone returns one size.** Bigger crops carry more
+information, so they collide less and win every comparison - 2,995 of 3,000
+kept crops came from the largest size, and the difficulty dial was gone. Each
+size now gets its own quota.
+
+**Answerable is not the same as interesting.** Among equally answerable crops,
+the pick now favours the ones with the most going on, so a corner with an
+emblem in it beats a plain band boundary that grades exactly as well.
 
 ### Future option: angled crops
 
-Crops are axis-aligned to start with. Rotating the crop window by 45°, -45°,
-90° or -90° before extracting would add a whole second difficulty dimension
-at very little cost — the collision analysis is unchanged, it just runs over
-a rotated sampling grid. Rotation is especially valuable against horizontal
-tricolours, where an axis-aligned crop is often a flat band of one colour but
-an angled one cuts across a boundary and carries real information.
+Crops are axis-aligned. Rotating the window by 45, -45, 90 or -90 degrees would
+add a second difficulty dimension almost free - the collision analysis is
+unchanged, it just runs over a rotated sampling grid. Rotation is worth most
+against horizontal tricolours, where axis-aligned crops are usually a flat band
+and get discarded, but an angled one cuts across a boundary and carries real
+information.
 
 ## Which flags a quiz uses
 
@@ -487,11 +508,13 @@ assets/js/views/quiz.js       the play screen (shared by every mode)
 assets/flags/4x3/*.svg        250 flags, generated
 data/countries.json           250 country records, generated
 data/flag-colors.json         measured palettes and palette twins, generated
+data/flag-crops.json          chosen crops and what each could also be, generated
 data/fame.json                Wikipedia and population snapshot, generated
 data/sources.json             upstream package versions
 scripts/build-fame.mjs        prominence snapshot (the only script that fetches)
 scripts/build-flags.mjs       flags, country data, prominence ranking
 scripts/build-colors.mjs      colour measurement and twin detection
+scripts/build-crops.mjs       crop selection and collision counting
 scripts/serve.mjs             local dev server, no dependencies
 ```
 
@@ -572,8 +595,8 @@ npm start        # http://localhost:4173
 - [x] Identical-flag and palette-twin detection, with twin-aware grading
 - [x] Mode 4, colour pie
 - [x] Prominence ranking, and four flag selections cut from it
-- [ ] Crop analysis into `data/flag-crops.json`, thresholds tuned by eye
-- [ ] Mode 3, zoomed
+- [x] Crop analysis into `data/flag-crops.json`
+- [x] Mode 3, zoomed
 - [ ] Modes 5-7: low-res mosaic, blur reveal, real or fake
 - [ ] Somewhere to store play data, then measured difficulty
 - [ ] Difficulty weighting and palette-collision distractors

@@ -8,6 +8,7 @@ import {
   loadCountries,
   flagUrl,
   loadColours,
+  loadCrops,
   scopeCounts,
   SCOPES,
 } from '../data.js';
@@ -71,18 +72,37 @@ export async function renderQuiz(root, modeId) {
   }
 
   const needsColours = mode.stage === 'pie' || mode.ambiguity === 'palette';
+  const needsCrops = mode.stage === 'crop' || mode.ambiguity === 'crop';
   let colourData = null;
-  if (needsColours) {
-    try {
-      colourData = await loadColours();
-    } catch (err) {
-      root.innerHTML = `
-        <section class="panel panel--centred">
-          <h1 class="panel__title">Could not load the colour data</h1>
-          <p class="panel__text">${escapeHtml(err.message)}</p>
-        </section>`;
-      return;
+  let cropData = null;
+  try {
+    if (needsColours) colourData = await loadColours();
+    if (needsCrops) cropData = await loadCrops();
+  } catch (err) {
+    root.innerHTML = `
+      <section class="panel panel--centred">
+        <h1 class="panel__title">Could not load the quiz data</h1>
+        <p class="panel__text">${escapeHtml(err.message)}</p>
+      </section>`;
+    return;
+  }
+
+  /**
+   * One crop per flag, drawn before the round is built because the crop is
+   * what decides which other flags count as the same answer.
+   *
+   * Two flags have no usable crop at all: Indonesia and Poland are plain
+   * bicolours, and every region of them looks like a region of half a dozen
+   * other flags. They drop out of this mode rather than being asked as a
+   * question with no answer.
+   */
+  const crops = new Map();
+  if (needsCrops) {
+    for (const country of pool) {
+      const list = cropData.crops[country.code];
+      if (list?.length) crops.set(country.code, list[Math.floor(Math.random() * list.length)]);
     }
+    pool = pool.filter((c) => crops.has(c.code));
   }
 
   /**
@@ -92,10 +112,13 @@ export async function renderQuiz(root, modeId) {
    * it is only the flags that are literally identical, like France and its
    * overseas territories.
    */
-  const equivalentsOf = (country) =>
-    mode.ambiguity === 'palette'
-      ? (colourData.twins[country.code] ?? [])
-      : (country.sameFlagAs ?? []);
+  const equivalentsOf = (country) => {
+    if (mode.ambiguity === 'palette') return colourData.twins[country.code] ?? [];
+    // A crop's equivalents are the flags that same region could belong to,
+    // which differs crop by crop rather than flag by flag.
+    if (mode.ambiguity === 'crop') return crops.get(country.code)?.with ?? [];
+    return country.sameFlagAs ?? [];
+  };
 
   /**
    * Two indexes, deliberately.
@@ -146,6 +169,11 @@ export async function renderQuiz(root, modeId) {
             <div class="stage__disc" data-disc role="img"
                  aria-label="A pie chart of the flag's colours"></div>
           </div>
+          <div class="stage__crop" data-crop hidden>
+            <div class="stage__crop-window">
+              <img class="stage__crop-img" data-crop-img alt="A zoomed-in part of a flag">
+            </div>
+          </div>
           <img class="stage__flag" data-flag alt="The flag to identify">
           <figcaption class="stage__reveal" data-reveal hidden>
             <img class="stage__reveal-flag" data-reveal-flag alt="">
@@ -177,8 +205,31 @@ export async function renderQuiz(root, modeId) {
     revealName: root.querySelector('[data-reveal-name]'),
     pie: root.querySelector('[data-pie]'),
     disc: root.querySelector('[data-disc]'),
+    crop: root.querySelector('[data-crop]'),
+    cropImg: root.querySelector('[data-crop-img]'),
     figure: root.querySelector('.stage__figure'),
   };
+
+  /**
+   * Shows one region of a flag, blown up to fill a square window.
+   *
+   * The flag stays an SVG in an oversized <img>, offset so the wanted region
+   * lands in the window. No canvas, and the zoom is vector-crisp at any scale.
+   *
+   * Crop coordinates are fractions: x and size of the flag's width, y of its
+   * height. The region is square on screen, so its height is size * 4/3 of the
+   * flag's height.
+   */
+  function showCrop(crop, src) {
+    if (!crop) return;
+    const zoom = 100 / crop.size; // image width, as a % of the window
+    el.cropImg.src = src;
+    el.cropImg.style.width = `${zoom}%`;
+    el.cropImg.style.left = `${-crop.x * zoom}%`;
+    // `top` is a percentage of the square window's height, and the image is
+    // 4:3, so its own height is three quarters of its width.
+    el.cropImg.style.top = `${-crop.y * zoom * 0.75}%`;
+  }
 
   function paintMeters() {
     el.progress.textContent = `${round.results.length} / ${round.total}`;
@@ -195,6 +246,10 @@ export async function renderQuiz(root, modeId) {
     // the chart turns back into the thing it was measured from.
     if (mode.stage === 'pie') {
       el.pie.hidden = true;
+      el.flag.hidden = false;
+    }
+    if (mode.stage === 'crop') {
+      el.crop.hidden = true;
       el.flag.hidden = false;
     }
     el.figure.classList.add('is-revealed');
@@ -406,6 +461,12 @@ export async function renderQuiz(root, modeId) {
     if (mode.stage === 'pie') {
       el.disc.style.background = pieGradient(colourData.flags[round.question.answer.code]);
       el.pie.hidden = false;
+      el.flag.hidden = true;
+    }
+
+    if (mode.stage === 'crop') {
+      showCrop(crops.get(round.question.answer.code), flagUrl(round.question.answer));
+      el.crop.hidden = false;
       el.flag.hidden = true;
     }
 

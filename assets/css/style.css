@@ -649,6 +649,31 @@ button {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28);
 }
 
+/* The zoomed crop: an oversized SVG offset inside a square window, so the
+   magnification stays vector-crisp however far it is blown up. */
+.stage__crop {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: var(--bg-sunken);
+}
+
+.stage__crop-window {
+  position: relative;
+  height: 86%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.stage__crop-img {
+  position: absolute;
+  max-width: none;
+  display: block;
+}
+
 .stage__flag {
   width: 100%;
   aspect-ratio: 4 / 3;

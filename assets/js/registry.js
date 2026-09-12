@@ -79,8 +79,14 @@ export const MODES = [
     name: 'Zoomed',
     category: 'detail',
     rank: 3,
-    status: 'soon',
+    status: 'live',
     blurb: 'A small crop blown up. Sometimes a gift, sometimes almost nothing.',
+    hint: 'Crops are picked to be answerable, never to be a solid colour.',
+    preview: 'br',
+    // Draws a region of the flag chosen at build time, and grades against the
+    // other flags that region could equally belong to.
+    stage: 'crop',
+    ambiguity: 'crop',
   },
   {
     id: 'colour-pie',
