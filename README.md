@@ -278,15 +278,21 @@ an angled one cuts across a boundary and carries real information.
 
 ## Which flags a quiz uses
 
-Four selections, cumulative, so widening adds unfamiliar flags rather than
+Four selections, chosen on the home page before you start and carried into
+every quiz. They are cumulative, so widening adds obscure flags rather than
 swapping the familiar ones out:
 
-| Selection | Flags |
-| --- | --- |
-| 60 best known | The countries that come up most |
-| 130 best known | Two thirds of the world, familiar first |
-| All 193 countries | Every UN member, down to Tuvalu and Nauru |
-| All 250 flags | Adds territories: Greenland, Hong Kong, Puerto Rico |
+| Selection | Flags | |
+| --- | --- | --- |
+| Best known | 60 | The countries that come up most. Nothing obscure. |
+| A few obscure | 130 | Adds countries you may have to stop and think about. |
+| Plenty obscure | 193 | Every UN member, down to Tuvalu, Nauru and Kiribati. |
+| Obscure territories too | 250 | Adds Greenland, Hong Kong, Puerto Rico and the rest. |
+
+The choice lives on the home page rather than only inside the quiz. Buried in
+the play screen it was effectively invisible: a flag on screen takes all of
+the attention, and a small dropdown below it takes none. Choosing before you
+start is also the more natural order.
 
 ### Not "Easy, Medium, Hard"
 
@@ -300,11 +306,17 @@ recognisable its flag is.
 
 Two signals, blended 70/30, both on a log scale:
 
-**English Wikipedia traffic**, median monthly views over twelve months
-([`scripts/build-fame.mjs`](scripts/build-fame.mjs) snapshots this into
-`data/fame.json`, so builds never touch the network).
+**English Wikipedia traffic**, median monthly views over twelve months.
 
 **Population**, from the World Bank.
+
+Both are **captured once and committed**, not fetched live.
+[`scripts/build-fame.mjs`](scripts/build-fame.mjs) writes the snapshot to
+`data/fame.json` and every other build reads it from there, so the site makes
+no third-party requests, works offline, and cannot change ranking under you
+because a country was in the news this week. Re-capture deliberately with
+`npm run build:fame -- --refresh`. The snapshot records the period it covers
+and the date it was taken.
 
 Neither works alone, which is the whole reason for blending:
 

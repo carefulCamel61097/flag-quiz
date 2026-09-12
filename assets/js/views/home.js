@@ -3,7 +3,8 @@
  * mode that does not exist or miss one that does.
  */
 import { CATEGORIES, MODES, modesInCategory, liveModes } from '../registry.js';
-import { loadCountries, loadColours, flagUrl } from '../data.js';
+import { loadCountries, loadColours, flagUrl, SCOPES, scopeCounts } from '../data.js';
+import { readScope, writeScope } from '../settings.js';
 
 const FALLBACK_PREVIEW = 'br';
 
@@ -83,6 +84,26 @@ export function renderHome(root) {
         different way. Invert the colours, crop them, blur them, reduce them to
         nothing but a pie chart of their palette. Then you name the country.
       </p>
+    </section>
+
+    <!-- The selection used to live only inside the quiz, where nobody saw it:
+         the flag on screen takes all the attention. Choosing before you start
+         is both more visible and the more natural order. -->
+    <section class="picker">
+      <h2 class="picker__title">Which flags?</h2>
+      <div class="picker__options" role="radiogroup" aria-label="Which flags to include" data-picker>
+        ${Object.values(SCOPES)
+          .map(
+            (s) => `
+          <button class="picker__option" type="button" role="radio"
+                  aria-checked="false" data-scope="${s.id}">
+            <span class="picker__label">${s.label}</span>
+            <span class="picker__count" data-count="${s.id}"></span>
+          </button>`
+          )
+          .join('')}
+      </div>
+      <p class="picker__note" data-scope-note></p>
       ${
         featured
           ? `<a class="btn btn--primary btn--lg" href="#/play/${featured.id}">Play ${featured.name}</a>`
@@ -98,6 +119,38 @@ export function renderHome(root) {
   `;
 
   fillPreviews(root);
+  wirePicker(root);
+}
+
+/** The flag selection, shared with the play screen through localStorage. */
+async function wirePicker(root) {
+  const picker = root.querySelector('[data-picker]');
+  if (!picker) return;
+  const note = root.querySelector('[data-scope-note]');
+
+  const paint = (id) => {
+    for (const button of picker.querySelectorAll('.picker__option')) {
+      const on = button.dataset.scope === id;
+      button.classList.toggle('is-selected', on);
+      button.setAttribute('aria-checked', String(on));
+    }
+    note.textContent = SCOPES[id].note;
+  };
+
+  paint(readScope());
+
+  picker.addEventListener('click', (e) => {
+    const button = e.target.closest('.picker__option');
+    if (!button) return;
+    writeScope(button.dataset.scope);
+    paint(button.dataset.scope);
+  });
+
+  const counts = await scopeCounts();
+  for (const [id, n] of Object.entries(counts)) {
+    const slot = root.querySelector(`[data-count="${id}"]`);
+    if (slot) slot.textContent = `${n} flags`;
+  }
 }
 
 /** Card previews use real data, so each card demonstrates its own transform. */

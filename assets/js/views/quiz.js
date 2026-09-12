@@ -3,37 +3,17 @@
  * the flag, so every future mode reuses this whole screen.
  */
 import { MODE_BY_ID } from '../registry.js';
-import { countriesInScope, flagUrl, loadColours, SCOPES, DEFAULT_SCOPE } from '../data.js';
+import { countriesInScope, flagUrl, loadColours, scopeCounts, SCOPES } from '../data.js';
+import {
+  SCOPE_KEY,
+  ANSWER_KEY,
+  ANSWER_MODES,
+  readScope,
+  readAnswerMode,
+  writeSetting,
+} from '../settings.js';
 import { buildRound, Round, verdictFor } from '../engine.js';
 import { buildIndex, suggest, judge, MIN_SUGGEST_CHARS } from '../matching.js';
-
-const SCOPE_KEY = 'flag-quiz:scope';
-const ANSWER_KEY = 'flag-quiz:answer-mode';
-
-/** Typing is the default: it is the real test, and the reason altNames exists. */
-const ANSWER_MODES = {
-  type: { id: 'type', label: 'Type it' },
-  choose: { id: 'choose', label: 'Multiple choice' },
-};
-const DEFAULT_ANSWER_MODE = 'type';
-
-function readSetting(key, valid, fallback) {
-  try {
-    const saved = localStorage.getItem(key);
-    if (saved && valid(saved)) return saved;
-  } catch {
-    /* blocked storage - fall through to the default */
-  }
-  return fallback;
-}
-
-function writeSetting(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    /* the choice just will not persist */
-  }
-}
 
 /**
  * A pie as a single conic gradient: crisp at any size, no canvas, no library.
@@ -67,8 +47,9 @@ export async function renderQuiz(root, modeId) {
     return;
   }
 
-  const scopeId = readSetting(SCOPE_KEY, (v) => v in SCOPES, DEFAULT_SCOPE);
-  const answerMode = readSetting(ANSWER_KEY, (v) => v in ANSWER_MODES, DEFAULT_ANSWER_MODE);
+  const scopeId = readScope();
+  const answerMode = readAnswerMode();
+  const counts = await scopeCounts();
 
   let pool;
   try {
@@ -120,7 +101,9 @@ export async function renderQuiz(root, modeId) {
         ${options
           .map(
             (o) =>
-              `<option value="${o.id}" ${o.id === current ? 'selected' : ''}>${o.label}</option>`
+              `<option value="${o.id}" ${o.id === current ? 'selected' : ''}>${
+                o.label
+              }${counts[o.id] ? ` · ${counts[o.id]}` : ''}</option>`
           )
           .join('')}
       </select>

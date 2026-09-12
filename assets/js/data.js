@@ -23,29 +23,37 @@ const url = (path) => new URL(path, document.baseURI).href;
 export const SCOPES = {
   known60: {
     id: 'known60',
-    label: '60 best known',
-    note: 'The countries that come up most.',
+    label: 'Best known',
+    note: 'The countries that come up most. Nothing obscure.',
     match: (c) => c.sovereignty === 'un-member' && c.fameRank != null && c.fameRank <= 60,
   },
   known130: {
     id: 'known130',
-    label: '130 best known',
-    note: 'Two thirds of the world, familiar ones first.',
+    label: 'A few obscure',
+    note: 'Adds countries you may have to stop and think about.',
     match: (c) => c.sovereignty === 'un-member' && c.fameRank != null && c.fameRank <= 130,
   },
   un: {
     id: 'un',
-    label: 'All 193 countries',
-    note: 'Every UN member, down to Tuvalu and Nauru.',
+    label: 'Plenty obscure',
+    note: 'Every UN member, down to Tuvalu, Nauru and Kiribati.',
     match: (c) => c.sovereignty === 'un-member',
   },
   all: {
     id: 'all',
-    label: 'All 250 flags',
-    note: 'Adds territories: Greenland, Hong Kong, Puerto Rico and friends.',
+    label: 'Obscure territories too',
+    note: 'Adds Greenland, Hong Kong, Puerto Rico and the rest.',
     match: () => true,
   },
 };
+
+/** How many flags each selection covers, for labelling the choices. */
+export async function scopeCounts() {
+  const countries = await loadCountries();
+  return Object.fromEntries(
+    Object.values(SCOPES).map((s) => [s.id, countries.filter(s.match).length])
+  );
+}
 
 export const DEFAULT_SCOPE = 'known130';
 

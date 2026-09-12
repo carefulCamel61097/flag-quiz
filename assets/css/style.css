@@ -162,7 +162,7 @@ button {
 /* -------------------------------------------------------------------- hero */
 
 .hero {
-  padding: clamp(1.5rem, 6vw, 4rem) 0 clamp(2rem, 5vw, 3.5rem);
+  padding: clamp(1.5rem, 6vw, 4rem) 0 0;
   max-width: 46rem;
 }
 
@@ -184,10 +184,75 @@ button {
 }
 
 .hero__lede {
-  margin: 0 0 2rem;
+  margin: 0 0 1.5rem;
   color: var(--text-dim);
   font-size: clamp(1rem, 2.2vw, 1.17rem);
   max-width: 38rem;
+}
+
+/* ------------------------------------------------------------------ picker */
+
+.picker {
+  max-width: 46rem;
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.picker__title {
+  margin: 0 0 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.picker__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.picker__option {
+  display: grid;
+  gap: 0.1rem;
+  justify-items: start;
+  padding: 0.6rem 1rem;
+  min-height: var(--tap);
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.14s ease, background 0.14s ease, transform 0.1s ease;
+}
+.picker__option:hover {
+  border-color: var(--text-faint);
+  transform: translateY(-1px);
+}
+
+.picker__option.is-selected {
+  border-color: var(--accent);
+  background: rgba(255, 211, 77, 0.12);
+}
+
+.picker__label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.picker__option.is-selected .picker__label {
+  color: var(--accent);
+}
+
+.picker__count {
+  font-size: 0.76rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.picker__note {
+  margin: 0.9rem 0 1.8rem;
+  color: var(--text-dim);
+  min-height: 1.5em;
 }
 
 /* ----------------------------------------------------------------- buttons */
@@ -911,6 +976,15 @@ button {
   }
   .typer__skip {
     flex: 0 1 auto;
+  }
+
+  .picker__options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .picker__option {
+    justify-items: center;
+    text-align: center;
   }
 
   .upcoming__item {
