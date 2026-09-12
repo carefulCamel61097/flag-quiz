@@ -3,7 +3,14 @@
  * the flag, so every future mode reuses this whole screen.
  */
 import { MODE_BY_ID } from '../registry.js';
-import { countriesInScope, flagUrl, loadColours, scopeCounts, SCOPES } from '../data.js';
+import {
+  countriesInScope,
+  loadCountries,
+  flagUrl,
+  loadColours,
+  scopeCounts,
+  SCOPES,
+} from '../data.js';
 import {
   SCOPE_KEY,
   ANSWER_KEY,
@@ -90,7 +97,18 @@ export async function renderQuiz(root, modeId) {
       ? (colourData.twins[country.code] ?? [])
       : (country.sameFlagAs ?? []);
 
-  const index = buildIndex(pool);
+  /**
+   * Two indexes, deliberately.
+   *
+   * Suggestions only offer flags the round can actually ask for. Grading runs
+   * against every country, because an answer can be right without being in
+   * scope: in the 130-flag selection, Indonesia's pie is also Monaco's pie, and
+   * Monaco is not in the pool. It reads better when a wrong guess is wrong too
+   * - "That is Kiribati" rather than "not a country we recognised".
+   */
+  const suggestIndex = buildIndex(pool);
+  const gradeIndex = buildIndex(await loadCountries());
+
   const round = new Round(buildRound(pool, { equivalentsOf }));
   let locked = false;
 
@@ -294,7 +312,7 @@ export async function renderQuiz(root, modeId) {
 
       const answer = round.question.answer;
       const accept = new Set([answer.code, ...round.question.equivalents]);
-      const verdict = judge(index, value, answer);
+      const verdict = judge(gradeIndex, value, answer);
 
       // Naming a twin is a fair answer to this question, not a near miss.
       const viaTwin =
@@ -325,7 +343,7 @@ export async function renderQuiz(root, modeId) {
     };
 
     input.addEventListener('input', () => {
-      items = suggest(index, input.value);
+      items = suggest(suggestIndex, input.value);
       active = -1;
       paintList();
     });

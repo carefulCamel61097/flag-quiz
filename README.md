@@ -294,6 +294,19 @@ the play screen it was effectively invisible: a flag on screen takes all of
 the attention, and a small dropdown below it takes none. Choosing before you
 start is also the more natural order.
 
+It stays pinned under the masthead as you scroll the quiz list, compressed to a
+single row, so it reads as one setting governing everything below rather than
+part of the intro. Worth knowing if you touch this: a sticky element only
+sticks inside its own parent's box, so the bar is a direct child of the page.
+Nested in the intro block it unpinned the moment the intro scrolled away.
+
+Answers are graded against **every** country, not only the ones in the current
+selection. An answer can be right without being in scope - in the 130-flag
+selection, Indonesia's pie is also Monaco's, and Monaco is not in the pool -
+and a guess that names a real country reads better as "That is Kiribati" than
+as "not a country we recognised". Suggestions stay inside the selection, since
+those are the flags the round can actually ask about.
+
 ### Not "Easy, Medium, Hard"
 
 They are named for what they are. Difficulty is still unmeasured, and

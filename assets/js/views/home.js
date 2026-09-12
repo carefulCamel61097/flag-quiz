@@ -89,7 +89,11 @@ export function renderHome(root) {
     <!-- The selection used to live only inside the quiz, where nobody saw it:
          the flag on screen takes all the attention. Choosing before you start
          is both more visible and the more natural order. -->
-    <section class="picker">
+    <!-- The bar is a direct child of the page, not of a short wrapper: a
+         sticky element only sticks inside its own parent's box, so nesting it
+         in the intro block would unpin it as soon as the intro scrolled by. -->
+    <div class="picker__sentinel" data-sentinel aria-hidden="true"></div>
+    <div class="picker__bar" data-picker-root>
       <h2 class="picker__title">Which flags?</h2>
       <div class="picker__options" role="radiogroup" aria-label="Which flags to include" data-picker>
         ${Object.values(SCOPES)
@@ -103,13 +107,17 @@ export function renderHome(root) {
           )
           .join('')}
       </div>
+      <p class="picker__applies">Applies to every quiz</p>
+    </div>
+
+    <div class="picker__tail">
       <p class="picker__note" data-scope-note></p>
       ${
         featured
           ? `<a class="btn btn--primary btn--lg" href="#/play/${featured.id}">Play ${featured.name}</a>`
           : ''
       }
-    </section>
+    </div>
 
     <nav class="jump" aria-label="Quiz categories">
       ${CATEGORIES.map((c) => `<a class="jump__link" href="#${c.id}">${c.name}</a>`).join('')}
@@ -146,11 +154,32 @@ async function wirePicker(root) {
     paint(button.dataset.scope);
   });
 
+  stickWhenScrolled(root);
+
   const counts = await scopeCounts();
   for (const [id, n] of Object.entries(counts)) {
     const slot = root.querySelector(`[data-count="${id}"]`);
     if (slot) slot.textContent = `${n} flags`;
   }
+}
+
+/**
+ * The selection sticks under the masthead once you scroll past it, so it stays
+ * obvious that it is one setting governing every quiz below rather than part
+ * of the intro.
+ *
+ * A sentinel above it decides when: once that scrolls out of view the bar is
+ * pinned, and it compresses so it costs little height.
+ */
+function stickWhenScrolled(root) {
+  const sentinel = root.querySelector('[data-sentinel]');
+  const picker = root.querySelector('[data-picker-root]');
+  if (!sentinel || !picker || typeof IntersectionObserver !== 'function') return;
+
+  new IntersectionObserver(
+    ([entry]) => picker.classList.toggle('is-stuck', !entry.isIntersecting),
+    { threshold: 0 }
+  ).observe(sentinel);
 }
 
 /** Card previews use real data, so each card demonstrates its own transform. */
