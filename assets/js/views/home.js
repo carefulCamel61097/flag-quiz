@@ -3,7 +3,7 @@
  * mode that does not exist or miss one that does.
  */
 import { CATEGORIES, MODES, modesInCategory, liveModes } from '../registry.js';
-import { loadCountries, loadColours, flagUrl, SCOPES, scopeCounts } from '../data.js';
+import { loadCountries, loadColours, loadMosaics, flagUrl, SCOPES, scopeCounts } from '../data.js';
 import { readScope, writeScope } from '../settings.js';
 
 const FALLBACK_PREVIEW = 'br';
@@ -12,13 +12,21 @@ function modeCard(mode) {
   const code = mode.preview ?? FALLBACK_PREVIEW;
   // A card shows what its quiz actually looks like, so the pie mode previews a
   // pie rather than a flag.
-  const preview =
-    mode.stage === 'pie'
-      ? `<div class="card__preview card__preview--pie"><div class="pie" data-pie-preview="${code}"></div></div>`
-      : `<div class="card__preview" style="--mode-filter:${mode.filter ?? 'none'}">
-           <img alt="" aria-hidden="true" data-preview="${code}"
-                ${mode.previewTransform ? `style="transform:${mode.previewTransform}"` : ''}>
-         </div>`;
+  let preview;
+  if (mode.stage === 'pie') {
+    preview = `<div class="card__preview card__preview--pie">
+                 <div class="pie" data-pie-preview="${code}"></div>
+               </div>`;
+  } else if (mode.stage === 'mosaic') {
+    preview = `<div class="card__preview card__preview--mosaic">
+                 <div class="mosaic" data-mosaic-preview="${code}"></div>
+               </div>`;
+  } else {
+    preview = `<div class="card__preview" style="--mode-filter:${mode.filter ?? 'none'}">
+                 <img alt="" aria-hidden="true" data-preview="${code}"
+                      ${mode.previewTransform ? `style="transform:${mode.previewTransform}"` : ''}>
+               </div>`;
+  }
 
   return `
     <a class="card" href="#/play/${mode.id}">
@@ -203,6 +211,7 @@ function showPinnedWhenScrolledPast(expanded, pinned) {
 async function fillPreviews(root) {
   const flagSlots = [...root.querySelectorAll('[data-preview]')];
   const pieSlots = [...root.querySelectorAll('[data-pie-preview]')];
+  const mosaicSlots = [...root.querySelectorAll('[data-mosaic-preview]')];
 
   if (flagSlots.length) {
     const byCode = new Map((await loadCountries()).map((c) => [c.code, c]));
@@ -224,6 +233,21 @@ async function fillPreviews(root) {
         return `${c.hex} ${from.toFixed(3)}% ${(at * 100).toFixed(3)}%`;
       });
       slot.style.background = `conic-gradient(from -90deg, ${stops.join(', ')})`;
+    }
+  }
+
+  if (mosaicSlots.length) {
+    const { mosaics } = await loadMosaics();
+    for (const slot of mosaicSlots) {
+      // The finer of the two stored grids: a card is small, and four by three
+      // blocks at that size is an abstract painting rather than a flag.
+      const grid = mosaics[slot.dataset.mosaicPreview]?.at(-1);
+      if (!grid) continue;
+      slot.style.setProperty('--gx', grid.gx);
+      slot.style.setProperty('--gy', grid.gy);
+      slot.innerHTML = [...grid.cells.matchAll(/.{3}/g)]
+        .map(([code]) => (code === '...' ? '<i></i>' : `<i style="background:#${code}"></i>`))
+        .join('');
     }
   }
 }

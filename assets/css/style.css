@@ -445,6 +445,11 @@ button {
   overflow: hidden;
 }
 
+.card__preview--mosaic .mosaic {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
 .card__preview--pie {
   display: grid;
   place-items: center;
@@ -653,6 +658,26 @@ button {
   display: block;
 }
 
+/* The mosaic: the measured blocks as a plain CSS grid. No canvas, no image,
+   and every block stays a hard edge however large the stage gets. */
+.stage__mosaic {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--bg-sunken);
+}
+
+.mosaic {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--gx, 8), 1fr);
+  grid-template-rows: repeat(var(--gy, 6), 1fr);
+}
+
+.mosaic i {
+  display: block;
+}
+
 .stage__flag {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -671,6 +696,12 @@ button {
    turning back the right way round is the clearest explanation there is. */
 .stage__figure.is-revealed .stage__flag {
   transform: none !important;
+}
+
+/* Blur Reveal drives the blur from inline styles too, and clears them when the
+   question is answered; this is the backstop if anything is left behind. */
+.stage__figure.is-revealed .stage__flag {
+  filter: none !important;
 }
 
 .stage__reveal {
@@ -750,6 +781,34 @@ button {
   border-color: var(--bad);
   background: rgba(255, 107, 107, 0.16);
   opacity: 1;
+}
+
+/* What the question is still worth, counting down beside the score. Tabular
+   figures so a number ticking from 100 to 99 does not shuffle the row, and it
+   sits in the bar rather than inside .quiz__score, which stacks its children.
+   .quiz__mode already pushes everything after it to the right. */
+.quiz__worth {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--bg-raised);
+  color: var(--text-dim);
+}
+.quiz__worth.is-scored {
+  background: rgba(69, 212, 131, 0.18);
+  color: var(--good);
+}
+
+.results__points {
+  margin: 0.2rem 0 0;
+  color: var(--text-dim);
+}
+.results__points strong {
+  color: var(--accent);
+  font-size: 1.3rem;
 }
 
 .quiz__foot {

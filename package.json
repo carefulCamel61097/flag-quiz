@@ -6,12 +6,13 @@
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "build": "npm run build:fame && npm run build:flags && npm run build:colors && npm run build:crops && npm run build:fakes",
+    "build": "npm run build:fame && npm run build:flags && npm run build:colors && npm run build:crops && npm run build:fakes && npm run build:mosaics",
     "build:fame": "node scripts/build-fame.mjs",
     "build:flags": "node scripts/build-flags.mjs",
     "build:colors": "node scripts/build-colors.mjs",
     "build:crops": "node scripts/build-crops.mjs",
-    "build:fakes": "node scripts/build-fakes.mjs"
+    "build:fakes": "node scripts/build-fakes.mjs",
+    "build:mosaics": "node scripts/build-mosaics.mjs"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",

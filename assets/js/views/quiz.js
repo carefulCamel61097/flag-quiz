@@ -10,6 +10,7 @@ import {
   loadColours,
   loadCrops,
   loadFakes,
+  loadMosaics,
   scopeCounts,
   SCOPES,
 } from '../data.js';
@@ -40,6 +41,52 @@ const REORIENT = {
  * once and rewritten in memory rather than a second altered copy of all 250
  * flags being generated and shipped.
  */
+/**
+ * How long Blur Reveal takes to come fully into focus, and what a question is
+ * worth at either end of that.
+ *
+ * The flag always sharpens all the way, so every question is answerable in the
+ * end. What decays is the reward, which is what makes the mode a race against
+ * your own certainty rather than a staring contest.
+ */
+const REVEAL_MS = 14000;
+const WORTH_MAX = 100;
+const WORTH_MIN = 10;
+
+/** Starting blur, as a fraction of the flag's width, so phones match desktops. */
+const BLUR_SHARE = 0.055;
+
+const worthAt = (elapsedMs) =>
+  Math.max(
+    WORTH_MIN,
+    Math.round(WORTH_MAX - (Math.min(elapsedMs, REVEAL_MS) / REVEAL_MS) * (WORTH_MAX - WORTH_MIN))
+  );
+
+/**
+ * Why a second country counts as a right answer here.
+ *
+ * Every mode hides something different, so every mode makes a different pair
+ * of flags identical. Saying "makes the same pie" in Classic - where the two
+ * are simply the same flag - was both wrong and confusing, since no pie has
+ * been anywhere near the screen.
+ */
+const SHARED_BECAUSE = {
+  palette: (named, answer) => `${named} makes the same pie as ${answer}.`,
+  crop: (named, answer) => `that patch of ${answer} looks the same on ${named}.`,
+  mosaic: (named, answer) => `${named} blocks down to the same mosaic as ${answer}.`,
+  same: (named, answer) => `${named} flies the same flag as ${answer}.`,
+};
+
+/** One mosaic block per three characters; "..." is outside the flag (Nepal). */
+function mosaicBlocks(packed) {
+  let html = '';
+  for (let i = 0; i < packed.length; i += 3) {
+    const code = packed.slice(i, i + 3);
+    html += code === '...' ? '<i></i>' : `<i style="background:#${code}"></i>`;
+  }
+  return html;
+}
+
 const svgSource = new Map();
 async function recolouredFlag(country, swap) {
   if (!svgSource.has(country.code)) {
@@ -102,13 +149,16 @@ export async function renderQuiz(root, modeId) {
   const needsColours = mode.stage === 'pie' || mode.ambiguity === 'palette';
   const needsCrops = mode.stage === 'crop' || mode.ambiguity === 'crop';
   const needsFakes = mode.stage === 'altered';
+  const needsMosaics = mode.stage === 'mosaic' || mode.ambiguity === 'mosaic';
   let colourData = null;
   let cropData = null;
   let fakeData = null;
+  let mosaicData = null;
   try {
     if (needsColours) colourData = await loadColours();
     if (needsCrops) cropData = await loadCrops();
     if (needsFakes) fakeData = await loadFakes();
+    if (needsMosaics) mosaicData = await loadMosaics();
   } catch (err) {
     root.innerHTML = `
       <section class="panel panel--centred">
@@ -143,8 +193,25 @@ export async function renderQuiz(root, modeId) {
    * it is only the flags that are literally identical, like France and its
    * overseas territories.
    */
+  /**
+   * One mosaic per flag, drawn before the round like the crops and for the
+   * same reason: the grid decides which other flags count as the same answer.
+   * Two are stored per flag, a coarse one and a finer one, so the same flag is
+   * not the same question twice.
+   */
+  const mosaics = new Map();
+  if (needsMosaics) {
+    for (const country of pool) {
+      const list = mosaicData.mosaics[country.code];
+      if (list?.length) mosaics.set(country.code, list[Math.floor(Math.random() * list.length)]);
+    }
+    pool = pool.filter((c) => mosaics.has(c.code));
+  }
+
   const equivalentsOf = (country) => {
     if (mode.ambiguity === 'palette') return colourData.twins[country.code] ?? [];
+    // Whatever is indistinguishable at the grid this flag is being shown at.
+    if (mode.ambiguity === 'mosaic') return mosaics.get(country.code)?.with ?? [];
     // A crop's equivalents are the flags that same region could belong to,
     // which differs crop by crop rather than flag by flag.
     if (mode.ambiguity === 'crop') return crops.get(country.code)?.with ?? [];
@@ -213,6 +280,7 @@ export async function renderQuiz(root, modeId) {
       <header class="quiz__bar">
         <a class="quiz__back" href="#/" aria-label="Back to all quizzes">&larr;</a>
         <span class="quiz__mode">${mode.name}</span>
+        <span class="quiz__worth" data-worth hidden></span>
         <div class="quiz__score">
           <span data-progress></span>
           <span class="quiz__streak" data-streak hidden></span>
@@ -231,6 +299,10 @@ export async function renderQuiz(root, modeId) {
             <div class="stage__crop-window">
               <img class="stage__crop-img" data-crop-img alt="A zoomed-in part of a flag">
             </div>
+          </div>
+          <div class="stage__mosaic" data-mosaic hidden>
+            <div class="mosaic" data-blocks role="img"
+                 aria-label="A flag reduced to coloured blocks"></div>
           </div>
           <img class="stage__flag" data-flag alt="The flag to identify">
           <figcaption class="stage__reveal" data-reveal hidden>
@@ -273,8 +345,44 @@ export async function renderQuiz(root, modeId) {
     tell: root.querySelector('[data-tell]'),
     crop: root.querySelector('[data-crop]'),
     cropImg: root.querySelector('[data-crop-img]'),
+    mosaic: root.querySelector('[data-mosaic]'),
+    blocks: root.querySelector('[data-blocks]'),
+    worth: root.querySelector('[data-worth]'),
     figure: root.querySelector('.stage__figure'),
   };
+
+  /**
+   * Blur Reveal's clock. Two things run off it: the flag sharpening, which is
+   * a single CSS transition, and the counter showing what the question is
+   * still worth. Both are read from the same start time so they cannot drift.
+   */
+  let ticker = null;
+  const stopTicker = () => {
+    clearInterval(ticker);
+    ticker = null;
+  };
+
+  function startReveal() {
+    const width = el.figure.getBoundingClientRect().width || 640;
+    el.flag.style.transition = 'none';
+    el.flag.style.filter = `blur(${(width * BLUR_SHARE).toFixed(1)}px)`;
+    // Without reading back a layout value the browser coalesces both writes
+    // into one and the flag simply appears sharp.
+    void el.flag.offsetWidth;
+    el.flag.style.transition = `filter ${REVEAL_MS}ms linear`;
+    el.flag.style.filter = 'blur(0px)';
+
+    const started = performance.now();
+    const paint = () => {
+      // The view is rebuilt whenever a setting changes, orphaning this node.
+      if (!el.worth.isConnected) return stopTicker();
+      el.worth.textContent = `worth ${worthAt(performance.now() - started)}`;
+    };
+    el.worth.hidden = false;
+    paint();
+    stopTicker();
+    ticker = setInterval(paint, 200);
+  }
 
   /**
    * Shows one region of a flag, blown up to fill a square window.
@@ -353,6 +461,20 @@ export async function renderQuiz(root, modeId) {
     if (mode.stage === 'crop') {
       el.crop.hidden = true;
       el.flag.hidden = false;
+    }
+    if (mode.stage === 'mosaic') {
+      el.mosaic.hidden = true;
+      el.flag.hidden = false;
+    }
+    // Answering stops the clock: the flag snaps sharp and the counter freezes
+    // at what the answer was actually worth.
+    if (mode.stage === 'reveal') {
+      stopTicker();
+      el.flag.style.transition = '';
+      el.flag.style.filter = '';
+      const last = round.results.at(-1);
+      el.worth.textContent = correct ? `+${worthAt(last.elapsedMs)}` : 'missed';
+      el.worth.classList.toggle('is-scored', correct);
     }
     // The alteration comes off on the reveal. A flag un-flipping in place says
     // what was wrong with it better than any sentence can.
@@ -529,7 +651,8 @@ export async function renderQuiz(root, modeId) {
       form.querySelector('.typer__submit').hidden = true;
 
       if (viaTwin) {
-        feedback.textContent = `Also accepted - ${verdict.named.name} makes the same pie as ${answer.name}.`;
+        const because = SHARED_BECAUSE[mode.ambiguity ?? 'same'] ?? SHARED_BECAUSE.same;
+        feedback.textContent = `Also accepted - ${because(verdict.named.name, answer.name)}`;
         feedback.className = 'typer__feedback typer__feedback--ok';
         feedback.hidden = false;
       } else if (!correct) {
@@ -624,6 +747,20 @@ export async function renderQuiz(root, modeId) {
       el.flag.hidden = true;
     }
 
+    if (mode.stage === 'mosaic') {
+      const grid = mosaics.get(round.question.answer.code);
+      el.blocks.style.setProperty('--gx', grid.gx);
+      el.blocks.style.setProperty('--gy', grid.gy);
+      el.blocks.innerHTML = mosaicBlocks(grid.cells);
+      el.mosaic.hidden = false;
+      el.flag.hidden = true;
+    }
+
+    if (mode.stage === 'reveal') {
+      el.worth.classList.remove('is-scored');
+      startReveal();
+    }
+
     paintMeters();
     if (mode.answer === 'binary') paintVerdict();
     else if (answerMode === 'type') paintInput();
@@ -650,6 +787,10 @@ export async function renderQuiz(root, modeId) {
 
 function renderResults(root, mode, round, scopeId) {
   const misses = round.results.filter((r) => !r.correct);
+  const points = round.results.reduce(
+    (sum, r) => sum + (r.correct ? worthAt(r.elapsedMs) : 0),
+    0
+  );
 
   const said = (r) => {
     // Real or Fake: what they answered is only half of it. Without the second
@@ -669,6 +810,18 @@ function renderResults(root, mode, round, scopeId) {
       <p class="results__eyebrow">${mode.name} &middot; ${SCOPES[scopeId].label}</p>
       <p class="results__score"><strong>${round.correctCount}</strong> / ${round.total}</p>
       <p class="results__verdict">${verdictFor(round.correctCount, round.total)}</p>
+      ${
+        // Blur Reveal is scored twice: how many you got, and how early. Naming
+        // ten flags at the last moment and naming ten while they are still a
+        // smear are not the same round, and one number cannot say which it was.
+        mode.scoring === 'decay'
+          ? `<p class="results__points">
+               <strong>${points}</strong> points &middot; ${Math.round(
+                 points / Math.max(1, round.correctCount)
+               )} on average, out of ${WORTH_MAX}
+             </p>`
+          : ''
+      }
       <p class="results__streak">Best streak: ${round.bestStreak}</p>
 
       <div class="results__actions">

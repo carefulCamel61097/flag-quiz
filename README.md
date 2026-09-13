@@ -29,8 +29,8 @@ crop pipelines already exist.
 | 2 | **Inverted** | The flag with RGB values inverted. Red becomes cyan, white becomes black. Surprisingly hard, and instantly recognisable once it clicks. | High | Built |
 | 3 | **Zoomed** | A small crop blown up. The classic format, and the most immediately understandable. | High | Built |
 | 4 | **Colour pie** | A pie chart of the flag's colours, sized by how much of the flag each covers. No shapes, no layout — just the palette and its proportions. | High | Built |
-| 5 | **Low-res mosaic** | The flag downsampled to an N×M block grid. Difficulty is a single integer, which makes this the cleanest difficulty dial in the set and a natural progressive-reveal mode. | High | Low |
-| 6 | **Blur reveal** | Starts heavily blurred and sharpens on a timer. Points decay as it gets easier. | High | Low |
+| 5 | **Mosaic** | The flag downsampled to an N×M block grid. Difficulty is a single integer, which makes this the cleanest difficulty dial in the set. | High | Built |
+| 6 | **Blur reveal** | Starts heavily blurred and sharpens on a timer. Points decay as it gets easier. | High | Built |
 | 7 | **Real or fake?** | A flag, either genuine or with two of its colours traded or the whole thing flipped. Real or fake? | High | Built |
 
 Real or fake was the sleeper pick, and it earned it. It is endlessly
@@ -133,7 +133,7 @@ hand-maintained synonym list.
 
 ```bash
 npm install
-npm run build        # prominence, flags, country data, colours, crops, fakes
+npm run build        # prominence, flags, country data, colours, crops, fakes, mosaics
 ```
 
 [`scripts/build-flags.mjs`](scripts/build-flags.mjs) copies the 4:3 SVGs into
@@ -149,8 +149,10 @@ browser.
 
 [`scripts/build-crops.mjs`](scripts/build-crops.mjs) chooses the Zoomed
 crops and [`scripts/build-fakes.mjs`](scripts/build-fakes.mjs) chooses the
-alterations for Real or Fake. Both depend on `data/flag-colors.json`, so they
-run after it.
+alterations for Real or Fake, and
+[`scripts/build-mosaics.mjs`](scripts/build-mosaics.mjs) chooses the block grid
+each flag is shown at in Mosaic. The first two depend on
+`data/flag-colors.json`, so they run after it.
 
 [`scripts/build-fame.mjs`](scripts/build-fame.mjs) is the only script that
 touches the network, and it skips itself when `data/fame.json` already exists.
@@ -261,9 +263,15 @@ What the quiz does with it:
 - No two equivalents are ever offered in the same multiple-choice question,
   so there is never a second correct option to pick from.
 
+Each mode makes a different pair of flags identical, so each one says so in its
+own words: *makes the same pie as*, *blocks down to the same mosaic as*, *that
+patch looks the same on*, *flies the same flag as*. All four used to say "makes
+the same pie", including Classic, where no pie has been near the screen.
+
 The same reasoning drives [crop selection](#how-the-zoom-crops-work) for the
 Zoomed quiz, where a crop that could belong to several flags accepts any of
-them.
+them, and [mosaic grids](#how-the-mosaic-grids-are-chosen), where the grid is
+chosen to be the coarsest one that still leaves the flag identifiable.
 
 ## How the zoom crops work
 
@@ -398,6 +406,75 @@ traded places*, *Flipped left to right*. Guessing "fake" correctly without
 knowing what was wrong teaches nothing, and the explanation is the part worth
 keeping. On the reveal the flag also turns back into itself in place, which
 says it faster than any sentence.
+
+## How the mosaic grids are chosen
+
+Mosaic reduces the flag to a grid of flat blocks, which gives it the cleanest
+difficulty dial in the set: one integer. It also has two ways to set that
+integer wrong, and they are opposites.
+
+**Too coarse and the question has no answer.** At four by three, Japan, Poland,
+Indonesia, Monaco, Singapore and Peru are all a white rectangle with some red
+in it.
+
+**Too faithful and there is no question.** The first version of the build
+picked four by three for Russia and called it answerable, which it was — the
+blocks landed exactly on the three bands, so the "mosaic" was the Russian flag,
+pixel for pixel. Every plain tricolour came out the same way, and for half the
+corpus the mode was Classic with extra steps.
+
+So a grid has to clear both bars. It must destroy enough of the flag to be
+worth asking about — the mosaic is compared against a 32×24 reference of the
+real thing and has to differ by more than 26 on average — and what is left
+must still tell the flag apart from the other 249.
+
+The grids themselves are the other half of the fix:
+
+```
+5×4    7×5    11×8    16×11
+```
+
+No row count divides three and no column count divides two or three, so a flag
+in bands never lines up with the grid and its stripes always blend across a
+block boundary. That is the only reason the mode works on a tricolour at all.
+61 candidate grids were rejected as too faithful even so.
+
+Each flag is shown at the coarsest grid that clears both bars, and the next one
+up is kept as well, so the same flag is not the same question twice. 241 flags
+land on 5×4. Morocco and Somalia have no usable grid — both are a single field
+with a small emblem, and blocking the emblem away leaves a plain rectangle — so
+they drop out of this mode, exactly as Indonesia and Poland drop out of Zoomed.
+
+### The tolerance here is strict, and in Real or Fake it is loose
+
+Both builds ask "are these two images the same?", and they answer it with
+different numbers: 75 for mosaics and crops, 175 for alterations. The
+difference is what the player is comparing against.
+
+An alteration is judged against a flag being remembered, so the measurement has
+to allow for the fact that nobody recalls a shade — hence 175, roughly the
+width of a colour family. A mosaic is on the screen with its colours intact, so
+a green band and a blue band are plainly different. The first run of the mosaic
+build used 175 and had Bulgaria's mosaic accepting "Russia", which is not
+generosity, it is marking a wrong answer right.
+
+At 75, eight flags still share a mosaic with another, and every pair earns it:
+Bonaire and the Netherlands, Indonesia and Monaco, Norway and Svalbard, the
+United States and its Minor Outlying Islands. Those are accepted either way.
+
+## How Blur Reveal is scored
+
+Blur Reveal always comes into focus, so every question is answerable in the
+end. What decays is the reward: a question opens worth 100 and slides to 10
+over fourteen seconds, and the counter beside the score says what it is worth
+right now. The round then reports both numbers, because naming ten flags at the
+last moment and naming ten while they are still a smear are not the same round
+and one number cannot say which it was.
+
+The blur is set in pixels scaled to the width of the flag on screen — 5.5% of
+it — rather than as a fixed radius, so a phone and a desktop show the same
+puzzle rather than the phone showing an easier one. The sharpening is a single
+CSS transition; nothing is redrawn frame by frame.
 
 ## Which flags a quiz uses
 
@@ -621,6 +698,7 @@ data/countries.json           250 country records, generated
 data/flag-colors.json         measured palettes and palette twins, generated
 data/flag-crops.json          chosen crops and what each could also be, generated
 data/flag-fakes.json          verified alterations for Real or Fake, generated
+data/flag-mosaics.json        block grid per flag and what it shares, generated
 data/fame.json                Wikipedia and population snapshot, generated
 data/sources.json             upstream package versions
 scripts/build-fame.mjs        prominence snapshot (the only script that fetches)
@@ -628,6 +706,7 @@ scripts/build-flags.mjs       flags, country data, prominence ranking
 scripts/build-colors.mjs      colour measurement and twin detection
 scripts/build-crops.mjs       crop selection and collision counting
 scripts/build-fakes.mjs       alteration selection and real-flag collision checks
+scripts/build-mosaics.mjs     block grids: coarse enough to hide, fine enough to answer
 scripts/serve.mjs             local dev server, no dependencies
 ```
 
@@ -716,7 +795,9 @@ npm start        # http://localhost:4173
 - [x] Mode 3, zoomed
 - [x] Alteration analysis into `data/flag-fakes.json`
 - [x] Mode 7, real or fake
-- [ ] Modes 5-6: low-res mosaic, blur reveal
+- [x] Mosaic grid analysis into `data/flag-mosaics.json`
+- [x] Mode 5, mosaic
+- [x] Mode 6, blur reveal
 - [ ] Somewhere to store play data, then measured difficulty
 - [ ] Difficulty weighting and palette-collision distractors
 - [ ] Strong follow-ups (modes 7-12)

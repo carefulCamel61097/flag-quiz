@@ -107,17 +107,29 @@ export const MODES = [
     name: 'Mosaic',
     category: 'detail',
     rank: 5,
-    status: 'soon',
+    status: 'live',
     blurb: 'The flag reduced to a handful of coloured blocks.',
+    hint: 'Each flag is shown at the blockiest grid that still tells it apart from the rest.',
+    preview: 'br',
+    // Draws the blocks measured at build time, and grades against the flags
+    // whose blocks are indistinguishable from them.
+    stage: 'mosaic',
+    ambiguity: 'mosaic',
   },
   {
     id: 'blur',
     name: 'Blur Reveal',
     category: 'detail',
     rank: 6,
-    status: 'soon',
+    status: 'live',
     blurb: 'Starts as a smear and sharpens on a timer. Answer early, score more.',
+    hint: 'It always comes into focus. The question is how long you need.',
+    preview: 'br',
+    // The card shows the starting blur. In play the blur is set in pixels
+    // scaled to the flag on screen, so it looks the same on a phone.
     filter: 'blur(14px)',
+    stage: 'reveal',
+    scoring: 'decay',
   },
   {
     id: 'real-or-fake',
