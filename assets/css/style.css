@@ -659,12 +659,18 @@ button {
   object-fit: contain;
   background: var(--bg-sunken);
   filter: var(--mode-filter, none);
-  transition: filter 0.45s ease;
+  transition: filter 0.45s ease, transform 0.45s ease;
 }
 
 /* The reveal: the transform drops away and the true flag fades in over it. */
 .stage__figure.is-revealed .stage__flag {
   filter: none;
+}
+
+/* Real or Fake sets the flip inline, so the reveal has to outrank it. A flag
+   turning back the right way round is the clearest explanation there is. */
+.stage__figure.is-revealed .stage__flag {
+  transform: none !important;
 }
 
 .stage__reveal {
@@ -720,6 +726,18 @@ button {
 .option:disabled {
   cursor: default;
   opacity: 0.55;
+}
+
+/* Real or Fake has two answers, not four, and they carry the whole round. Big
+   enough to hit without looking, and wide enough not to read as an afterthought
+   next to a full-width flag. */
+.options--binary {
+  gap: 1rem;
+}
+.options--binary .option {
+  padding: 1.15rem 1rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.01em;
 }
 
 .option--correct {

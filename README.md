@@ -31,12 +31,13 @@ crop pipelines already exist.
 | 4 | **Colour pie** | A pie chart of the flag's colours, sized by how much of the flag each covers. No shapes, no layout — just the palette and its proportions. | High | Built |
 | 5 | **Low-res mosaic** | The flag downsampled to an N×M block grid. Difficulty is a single integer, which makes this the cleanest difficulty dial in the set and a natural progressive-reveal mode. | High | Low |
 | 6 | **Blur reveal** | Starts heavily blurred and sharpens on a timer. Points decay as it gets easier. | High | Low |
-| 7 | **Real or fake?** | A flag with one property subtly altered — stripe order swapped, a colour shifted 15° in hue, a star miscounted, band widths changed. Real or fake? | High | Low–medium |
+| 7 | **Real or fake?** | A flag, either genuine or with two of its colours traded or the whole thing flipped. Real or fake? | High | Built |
 
-Real or fake is the sleeper pick. It is endlessly generative from 250 source
-flags, and it tests something no other mode does: precision of memory rather
-than recognition. Worth building early even though it is not an obvious
-headline feature.
+Real or fake was the sleeper pick, and it earned it. It is endlessly
+generative from 250 source flags, and it tests something no other mode does:
+precision of memory rather than recognition. It is also the only mode where a
+player who knows the flag cold can still be caught, which is the thing that
+keeps a quiz worth replaying.
 
 ### Strong follow-ups
 
@@ -132,7 +133,7 @@ hand-maintained synonym list.
 
 ```bash
 npm install
-npm run build        # prominence, flags, country data, colours, crops
+npm run build        # prominence, flags, country data, colours, crops, fakes
 ```
 
 [`scripts/build-flags.mjs`](scripts/build-flags.mjs) copies the 4:3 SVGs into
@@ -145,6 +146,11 @@ upstream changes.
 flag and writes `data/flag-colors.json`. It takes about two minutes, and needs
 `@resvg/resvg-js` — a build-time dependency only, never shipped to the
 browser.
+
+[`scripts/build-crops.mjs`](scripts/build-crops.mjs) chooses the Zoomed
+crops and [`scripts/build-fakes.mjs`](scripts/build-fakes.mjs) chooses the
+alterations for Real or Fake. Both depend on `data/flag-colors.json`, so they
+run after it.
 
 [`scripts/build-fame.mjs`](scripts/build-fame.mjs) is the only script that
 touches the network, and it skips itself when `data/fame.json` already exists.
@@ -323,6 +329,75 @@ unchanged, it just runs over a rotated sampling grid. Rotation is worth most
 against horizontal tricolours, where axis-aligned crops are usually a flat band
 and get discarded, but an angled one cuts across a boundary and carries real
 information.
+
+## How the fakes are made
+
+Real or Fake shows a flag that is either genuine or altered, and the whole
+mode rests on the alterations being fair. There are two opposite ways to get
+that wrong, and both were hit while building it.
+
+**Too subtle to answer.** Mirroring Bangladesh moves its disc from just left of
+centre to just right of it. The change is real, nobody can see it, and the
+question becomes a coin toss wearing a costume.
+
+**Not a fake at all.** Mirroring Ireland produces the flag of Côte d'Ivoire.
+Flipping Indonesia produces Poland. Swapping Iceland's blue and red produces
+Norway. A player who answers "real" is right, and the reveal would be telling
+them something false.
+
+So every candidate is rendered and measured before it ships. The flag is
+reduced to a 12×9 grid of average colours, and the alteration has to clear two
+bars:
+
+- **It has to have changed something.** The mean distance between the two
+  grids must exceed 34. Nearly-symmetric flags lose their mirror this way.
+- **It must not resemble any of the 250 real flags.** Every cell within 175 of
+  another flag's, and the candidate is dropped.
+
+That second threshold is much looser than the one the crop analysis uses, and
+deliberately. At 75 a mirrored Ireland was shipped as a fake, because Ireland's
+green (`#009a49`) is not Côte d'Ivoire's green (`#00cd00`). The measurement was
+correct and irrelevant: nobody holds the two side by side. 175 is roughly the
+width of a colour family — two greens match, green and orange do not, blue and
+navy do not — which is the distinction a player actually makes from memory.
+
+Thirty-two alterations were rejected for landing on a real flag, in pairs that
+name themselves: Guinea and Mali, Ireland and Côte d'Ivoire, Monaco, Poland and
+Indonesia, Iceland and Norway, Armenia and Venezuela.
+
+### The two kinds of alteration
+
+**Colour swaps** trade two of the flag's largest colours. Only colours covering
+at least 8% of the flag are eligible, and only pairs with different plain names
+— you cannot swap two blues and then explain what you did. The swap is defined
+on the *measured* palette rather than on the SVG text, because a colour written
+once in the file can be most of the flag and a colour written fifty times can
+be a hairline inside a coat of arms.
+
+**Reorientations** mirror, flip or turn the flag. They are free and they never
+invent a colour that was not there. Horizontal stripes have no left and right,
+so flipping and turning them produce the same picture; the duplicate is dropped.
+
+Nothing is shipped as a second image. A swap is stored as a two-entry map from
+colour to colour and applied to the SVG text in the browser when the flag is
+shown; a reorientation is one CSS transform. Serbia's flag alone is 180KB, so
+shipping altered copies would have cost megabytes for something expressible in
+forty bytes. [`assets/js/svg-colour.js`](assets/js/svg-colour.js) does the
+rewriting and is imported by both the build and the site, so the build measures
+exactly the image the player sees.
+
+779 alterations survived, across 241 of the 250 flags. Nine flags have none —
+China, Indonesia, Macau, Micronesia, Monaco, Morocco, Poland, Somalia and
+Vietnam — because every alteration of them is either invisible or another
+country's flag. Those are only ever shown genuine.
+
+### What the player is told afterwards
+
+Every altered flag is explained, win or lose: *The blue and the yellow have
+traded places*, *Flipped left to right*. Guessing "fake" correctly without
+knowing what was wrong teaches nothing, and the explanation is the part worth
+keeping. On the reveal the flag also turns back into itself in place, which
+says it faster than any sentence.
 
 ## Which flags a quiz uses
 
@@ -535,6 +610,8 @@ assets/css/style.css
 assets/js/registry.js         what quizzes exist  <-- single source of truth
 assets/js/engine.js           rounds, distractors, scoring (mode-agnostic)
 assets/js/matching.js         free-text grading and type-ahead suggestions
+assets/js/tells.js            why two near-identical palettes are not the same
+assets/js/svg-colour.js       reading and rewriting flag colours (shared with the build)
 assets/js/data.js             dataset loading and scopes
 assets/js/app.js              hash router
 assets/js/views/home.js       the hub
@@ -543,18 +620,24 @@ assets/flags/4x3/*.svg        250 flags, generated
 data/countries.json           250 country records, generated
 data/flag-colors.json         measured palettes and palette twins, generated
 data/flag-crops.json          chosen crops and what each could also be, generated
+data/flag-fakes.json          verified alterations for Real or Fake, generated
 data/fame.json                Wikipedia and population snapshot, generated
 data/sources.json             upstream package versions
 scripts/build-fame.mjs        prominence snapshot (the only script that fetches)
 scripts/build-flags.mjs       flags, country data, prominence ranking
 scripts/build-colors.mjs      colour measurement and twin detection
 scripts/build-crops.mjs       crop selection and collision counting
+scripts/build-fakes.mjs       alteration selection and real-flag collision checks
 scripts/serve.mjs             local dev server, no dependencies
 ```
 
 ### Answering
 
 Two ways to answer, switchable mid-round and remembered between visits.
+
+Real or Fake is the exception: it asks about the flag rather than about the
+country, so it has its own two-button answer and the type-or-choose setting is
+hidden while playing it.
 
 **Type it** (the default) grades knowledge, not spelling. "Kyrgystan",
 "cote divoire" and "Holland" are all accepted; accents, case and punctuation
@@ -631,7 +714,9 @@ npm start        # http://localhost:4173
 - [x] Prominence ranking, and four flag selections cut from it
 - [x] Crop analysis into `data/flag-crops.json`
 - [x] Mode 3, zoomed
-- [ ] Modes 5-7: low-res mosaic, blur reveal, real or fake
+- [x] Alteration analysis into `data/flag-fakes.json`
+- [x] Mode 7, real or fake
+- [ ] Modes 5-6: low-res mosaic, blur reveal
 - [ ] Somewhere to store play data, then measured difficulty
 - [ ] Difficulty weighting and palette-collision distractors
 - [ ] Strong follow-ups (modes 7-12)

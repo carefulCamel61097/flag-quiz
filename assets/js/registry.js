@@ -124,8 +124,17 @@ export const MODES = [
     name: 'Real or Fake?',
     category: 'compare',
     rank: 7,
-    status: 'soon',
-    blurb: 'One detail may have been altered. Stripe order, a hue, a star count.',
+    status: 'live',
+    blurb: 'One flag, altered or not. Two colours traded, or the whole thing flipped.',
+    hint: 'Every alteration is checked against all 250 flags, so a fake is never another country.',
+    // A mirrored United States: the canton jumps to the right, which says what
+    // the mode is at a glance without needing the altered-flag machinery here.
+    preview: 'us',
+    previewTransform: 'scaleX(-1)',
+    // Shows the flag either genuine or altered, and asks about the flag rather
+    // than about the country, so it has its own answer control.
+    stage: 'altered',
+    answer: 'binary',
   },
   {
     id: 'greyscale',

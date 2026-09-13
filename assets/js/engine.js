@@ -10,7 +10,7 @@ export const OPTIONS_PER_QUESTION = 4;
 
 const randomInt = (n) => Math.floor(Math.random() * n);
 
-function shuffle(items) {
+export function shuffle(items) {
   const out = [...items];
   for (let i = out.length - 1; i > 0; i--) {
     const j = randomInt(i + 1);
@@ -103,8 +103,14 @@ export class Round {
    * something unrecognisable. `correct` is passed in because free-text answers
    * are graded by the matcher, which knows about spelling; multiple choice can
    * just compare codes.
+   *
+   * `said` is for modes whose answer is not a country at all - Real or Fake
+   * asks about the flag on screen, so there is nothing to name.
    */
-  answer(chosen, { correct = chosen?.code === this.question.answer.code, typed = null } = {}) {
+  answer(
+    chosen,
+    { correct = chosen?.code === this.question.answer.code, typed = null, said = null } = {}
+  ) {
     const question = this.question;
 
     this.streak = correct ? this.streak + 1 : 0;
@@ -117,6 +123,7 @@ export class Round {
       question,
       chosen,
       typed,
+      said,
       correct,
       elapsedMs: Math.round(performance.now() - this.shownAt),
     });

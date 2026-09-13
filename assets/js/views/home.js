@@ -16,7 +16,8 @@ function modeCard(mode) {
     mode.stage === 'pie'
       ? `<div class="card__preview card__preview--pie"><div class="pie" data-pie-preview="${code}"></div></div>`
       : `<div class="card__preview" style="--mode-filter:${mode.filter ?? 'none'}">
-           <img alt="" aria-hidden="true" data-preview="${code}">
+           <img alt="" aria-hidden="true" data-preview="${code}"
+                ${mode.previewTransform ? `style="transform:${mode.previewTransform}"` : ''}>
          </div>`;
 
   return `
@@ -99,7 +100,8 @@ export function renderHome(root) {
       <p class="hero__lede">
         Every quiz here takes the same 250 country flags and hides them in a
         different way. Invert the colours, crop them, blur them, reduce them to
-        nothing but a pie chart of their palette. Then you name the country.
+        nothing but a pie chart of their palette, or quietly alter one and see
+        if you notice. Then you name the country.
       </p>
     </section>
 

@@ -9,6 +9,7 @@ import {
   flagUrl,
   loadColours,
   loadCrops,
+  loadFakes,
   scopeCounts,
   SCOPES,
 } from '../data.js';
@@ -20,9 +21,35 @@ import {
   readAnswerMode,
   writeSetting,
 } from '../settings.js';
-import { buildRound, Round, verdictFor } from '../engine.js';
+import { buildRound, Round, shuffle, verdictFor } from '../engine.js';
 import { buildIndex, suggest, judge, MIN_SUGGEST_CHARS } from '../matching.js';
 import { tellApart } from '../tells.js';
+import { recolourSvg } from '../svg-colour.js';
+
+/** How an alteration that is only a reorientation is drawn. */
+const REORIENT = {
+  mirror: 'scaleX(-1)',
+  flip: 'scaleY(-1)',
+  rot180: 'scale(-1)',
+};
+
+/**
+ * A recoloured flag, as a URL an <img> can use.
+ *
+ * The alteration is a handful of colour substitutions, so the SVG is fetched
+ * once and rewritten in memory rather than a second altered copy of all 250
+ * flags being generated and shipped.
+ */
+const svgSource = new Map();
+async function recolouredFlag(country, swap) {
+  if (!svgSource.has(country.code)) {
+    const res = await fetch(flagUrl(country));
+    if (!res.ok) throw new Error(`Could not load ${country.name}'s flag`);
+    svgSource.set(country.code, await res.text());
+  }
+  const svg = recolourSvg(svgSource.get(country.code), swap);
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
 
 /**
  * A pie as a single conic gradient: crisp at any size, no canvas, no library.
@@ -74,11 +101,14 @@ export async function renderQuiz(root, modeId) {
 
   const needsColours = mode.stage === 'pie' || mode.ambiguity === 'palette';
   const needsCrops = mode.stage === 'crop' || mode.ambiguity === 'crop';
+  const needsFakes = mode.stage === 'altered';
   let colourData = null;
   let cropData = null;
+  let fakeData = null;
   try {
     if (needsColours) colourData = await loadColours();
     if (needsCrops) cropData = await loadCrops();
+    if (needsFakes) fakeData = await loadFakes();
   } catch (err) {
     root.innerHTML = `
       <section class="panel panel--centred">
@@ -136,6 +166,33 @@ export async function renderQuiz(root, modeId) {
   const round = new Round(buildRound(pool, { equivalentsOf }));
   let locked = false;
 
+  /**
+   * Half the round is altered, near enough.
+   *
+   * Not exactly half, and never announced: a player who knows the split can
+   * count what they have seen and answer the last few without looking. Nine
+   * flags have no usable alteration at all - China, Poland and Somalia among
+   * them - so those are only ever shown genuine.
+   */
+  if (needsFakes) {
+    const target = Math.round(round.total / 2);
+    const alterable = shuffle(round.questions.filter((q) => fakeData.fakes[q.answer.code]));
+    for (const question of alterable.slice(0, target)) {
+      const list = fakeData.fakes[question.answer.code];
+      const fake = { ...list[Math.floor(Math.random() * list.length)] };
+      if (fake.kind === 'swap') {
+        // Fetched now rather than at the moment the question appears, so the
+        // genuine flag never flashes up before the altered one replaces it.
+        try {
+          fake.src = await recolouredFlag(question.answer, fake.swap);
+        } catch {
+          continue; // shown genuine instead; a missing file is not a question
+        }
+      }
+      question.fake = fake;
+    }
+  }
+
   const settings = (key, current, options) => `
     <label class="setting">
       <span class="sr-only">${key === SCOPE_KEY ? 'Which flags to include' : 'How to answer'}</span>
@@ -189,7 +246,13 @@ export async function renderQuiz(root, modeId) {
       <div class="quiz__foot">
         <div class="quiz__settings">
           ${settings(SCOPE_KEY, scopeId, Object.values(SCOPES))}
-          ${settings(ANSWER_KEY, answerMode, Object.values(ANSWER_MODES))}
+          ${
+            // Real or Fake asks about the flag, not about the country, so
+            // "type it or pick it" is not a choice that exists here.
+            mode.answer === 'binary'
+              ? ''
+              : settings(ANSWER_KEY, answerMode, Object.values(ANSWER_MODES))
+          }
         </div>
         <button class="btn btn--primary" data-next hidden>Next</button>
       </div>
@@ -248,6 +311,20 @@ export async function renderQuiz(root, modeId) {
    */
   function showTell(correct, named) {
     el.tell.hidden = true;
+
+    /**
+     * In Real or Fake the alteration is always spelled out, whether the player
+     * got it or not: guessing "fake" correctly and not knowing what was wrong
+     * with it teaches nothing, and on a genuine flag the silence is the point.
+     */
+    if (mode.stage === 'altered') {
+      const fake = round.question.fake;
+      if (!fake) return;
+      el.tell.textContent = fake.says;
+      el.tell.hidden = false;
+      return;
+    }
+
     if (correct || !named || mode.ambiguity !== 'palette' || !colourData) return;
 
     const answer = round.question.answer;
@@ -262,9 +339,10 @@ export async function renderQuiz(root, modeId) {
     el.tell.hidden = false;
   }
 
-  /** Shared ending for both answer modes. */
+  /** Shared ending for every answer mode. */
   function settle({ correct, named }) {
     const answer = round.question.answer;
+    const fake = round.question.fake;
 
     // In pie mode the flag has been hidden all along; the reveal is the moment
     // the chart turns back into the thing it was measured from.
@@ -275,6 +353,12 @@ export async function renderQuiz(root, modeId) {
     if (mode.stage === 'crop') {
       el.crop.hidden = true;
       el.flag.hidden = false;
+    }
+    // The alteration comes off on the reveal. A flag un-flipping in place says
+    // what was wrong with it better than any sentence can.
+    if (mode.stage === 'altered') {
+      el.flag.style.transform = '';
+      el.flag.src = flagUrl(answer);
     }
     el.figure.classList.add('is-revealed');
     el.figure.classList.toggle('was-wrong', !correct);
@@ -320,6 +404,42 @@ export async function renderQuiz(root, modeId) {
         else if (b === button) b.classList.add('option--wrong');
       }
       settle({ correct, named: chosen });
+    });
+  }
+
+  // ------------------------------------------------------------- verdict mode
+
+  /**
+   * Real or Fake's answer: two buttons, no country involved.
+   *
+   * Deliberately not folded into paintChoices. That one is about naming a
+   * country and grades by comparing codes; this one grades the flag on screen,
+   * and the only thing the two share is the look of the buttons.
+   */
+  function paintVerdict() {
+    el.answer.innerHTML = `
+      <div class="options options--binary" data-options role="group"
+           aria-label="Is this the real flag?">
+        <button class="option" type="button" data-say="real">Real</button>
+        <button class="option" type="button" data-say="fake">Fake</button>
+      </div>`;
+
+    el.answer.querySelector('[data-options]').addEventListener('click', (e) => {
+      const button = e.target.closest('.option');
+      if (!button || locked) return;
+      locked = true;
+
+      const altered = Boolean(round.question.fake);
+      const said = button.dataset.say;
+      const correct = (said === 'fake') === altered;
+      round.answer(null, { correct, said: said === 'fake' ? 'Fake' : 'Real' });
+
+      for (const b of el.answer.querySelectorAll('.option')) {
+        b.disabled = true;
+        if ((b.dataset.say === 'fake') === altered) b.classList.add('option--correct');
+        else if (b === button) b.classList.add('option--wrong');
+      }
+      settle({ correct, named: null });
     });
   }
 
@@ -484,6 +604,14 @@ export async function renderQuiz(root, modeId) {
     el.next.hidden = true;
     el.flag.src = flagUrl(round.question.answer);
 
+    if (mode.stage === 'altered') {
+      const fake = round.question.fake;
+      // A reorientation is a CSS transform on the same file; a colour swap is
+      // a rewritten copy of the SVG, prepared when the round was built.
+      el.flag.style.transform = fake ? (REORIENT[fake.kind] ?? '') : '';
+      if (fake?.src) el.flag.src = fake.src;
+    }
+
     if (mode.stage === 'pie') {
       el.disc.style.background = pieGradient(colourData.flags[round.question.answer.code]);
       el.pie.hidden = false;
@@ -497,7 +625,8 @@ export async function renderQuiz(root, modeId) {
     }
 
     paintMeters();
-    if (answerMode === 'type') paintInput();
+    if (mode.answer === 'binary') paintVerdict();
+    else if (answerMode === 'type') paintInput();
     else paintChoices();
   }
 
@@ -523,6 +652,13 @@ function renderResults(root, mode, round, scopeId) {
   const misses = round.results.filter((r) => !r.correct);
 
   const said = (r) => {
+    // Real or Fake: what they answered is only half of it. Without the second
+    // half the list is ten flags and ten "you said Real"s, which says nothing.
+    if (r.said) {
+      return `you said ${r.said} &middot; ${
+        r.question.fake ? escapeHtml(r.question.fake.says) : 'Genuine.'
+      }`;
+    }
     if (r.chosen) return `you said ${escapeHtml(r.chosen.name)}`;
     if (r.typed) return `you typed &ldquo;${escapeHtml(r.typed)}&rdquo;`;
     return 'skipped';
