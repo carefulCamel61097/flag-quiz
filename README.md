@@ -195,6 +195,33 @@ One footgun worth recording: resvg's `image.pixels` is a getter that allocates
 a fresh Buffer on every read. Touching it inside a per-pixel loop exhausts
 memory within seconds.
 
+## Telling near misses apart
+
+Accepting twins solves the questions that have several right answers. It does
+nothing for the ones that are nearly, but not quite, the same - and in a colour
+quiz that is most wrong answers. Being told "wrong" when the pie really did
+look like Romania's teaches nothing.
+
+So when a wrong answer is close, the quiz says what would have given it away:
+
+> Close. The blue in Cuba is lighter than in Dominican Republic.
+>
+> Close. The white is 33% of Austria but 43% of Canada.
+>
+> Close. Paraguay has 4 colours in it, Russia has 3.
+
+[`assets/js/tells.js`](assets/js/tells.js) pairs the two palettes slice by
+slice and reports whichever difference is most noticeable: a shade, a size, or
+a slice count. It needs no extra generated data - the measured palettes already
+have everything - and it runs at read time against whatever the player typed.
+
+The hard part is restraint. The first version fired on **40%** of all wrong
+pairs, including telling someone who answered Japan for Brazil that the colour
+counts differed. "Close" said that often stops meaning anything. Tightened - a
+slice-count difference only counts when the shared colours nearly match, and
+the palettes have to be genuinely near - it fires on **5.9%**, which is about
+the rate at which an answer really was a near miss.
+
 ## When a question has more than one right answer
 
 Hiding a flag can hide the very thing that told it apart from another flag.
@@ -315,11 +342,18 @@ the play screen it was effectively invisible: a flag on screen takes all of
 the attention, and a small dropdown below it takes none. Choosing before you
 start is also the more natural order.
 
-It stays pinned under the masthead as you scroll the quiz list, compressed to a
-single row, so it reads as one setting governing everything below rather than
-part of the intro. Worth knowing if you touch this: a sticky element only
-sticks inside its own parent's box, so the bar is a direct child of the page.
-Nested in the intro block it unpinned the moment the intro scrolled away.
+A second, compact copy pins under the masthead once the first scrolls away, so
+the setting stays visible as one thing governing everything below.
+
+That copy is `position: fixed`, not sticky, and the reason is worth recording.
+The first attempt made the real control sticky and compressed it when pinned.
+Sticky keeps an element in the flow, so compressing it moved everything below,
+and the trigger fired on a sentinel that the change could disturb - the two
+states fought each other and the bar flickered. Worse, the observer fired a
+whole masthead's height *after* the bar actually pinned, so in between the page
+showed the full-height bar jammed under the header. Fixed is outside the flow
+entirely: nothing moves, so there is no feedback loop, and the handover happens
+exactly when the real control goes under the masthead.
 
 Answers are graded against **every** country, not only the ones in the current
 selection. An answer can be right without being in scope - in the 130-flag

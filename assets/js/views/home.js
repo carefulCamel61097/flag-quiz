@@ -44,6 +44,23 @@ function upcomingRow(mode) {
     </li>`;
 }
 
+/** The same four buttons, rendered into both the expanded and pinned copies. */
+function pickerOptions() {
+  return `
+    <div class="picker__options" role="radiogroup" aria-label="Which flags to include">
+      ${Object.values(SCOPES)
+        .map(
+          (s) => `
+        <button class="picker__option" type="button" role="radio"
+                aria-checked="false" data-scope="${s.id}">
+          <span class="picker__label">${s.label}</span>
+          <span class="picker__count" data-count="${s.id}"></span>
+        </button>`
+        )
+        .join('')}
+    </div>`;
+}
+
 function categorySection(category) {
   const modes = modesInCategory(category.id);
   if (!modes.length) return '';
@@ -89,34 +106,24 @@ export function renderHome(root) {
     <!-- The selection used to live only inside the quiz, where nobody saw it:
          the flag on screen takes all the attention. Choosing before you start
          is both more visible and the more natural order. -->
-    <!-- The bar is a direct child of the page, not of a short wrapper: a
-         sticky element only sticks inside its own parent's box, so nesting it
-         in the intro block would unpin it as soon as the intro scrolled by. -->
-    <div class="picker__sentinel" data-sentinel aria-hidden="true"></div>
-    <div class="picker__bar" data-picker-root>
+    <section class="picker" data-picker-expanded>
       <h2 class="picker__title">Which flags?</h2>
-      <div class="picker__options" role="radiogroup" aria-label="Which flags to include" data-picker>
-        ${Object.values(SCOPES)
-          .map(
-            (s) => `
-          <button class="picker__option" type="button" role="radio"
-                  aria-checked="false" data-scope="${s.id}">
-            <span class="picker__label">${s.label}</span>
-            <span class="picker__count" data-count="${s.id}"></span>
-          </button>`
-          )
-          .join('')}
-      </div>
-      <p class="picker__applies">Applies to every quiz</p>
-    </div>
-
-    <div class="picker__tail">
+      ${pickerOptions()}
       <p class="picker__note" data-scope-note></p>
       ${
         featured
           ? `<a class="btn btn--primary btn--lg" href="#/play/${featured.id}">Play ${featured.name}</a>`
           : ''
       }
+    </section>
+
+    <!-- A separate, fixed copy rather than making the one above sticky.
+         Sticky kept it in the flow, so compressing it on pin moved everything
+         below and the two states fought each other. Fixed is out of the flow
+         entirely: nothing shifts, and there is no feedback loop to flicker. -->
+    <div class="picker-pinned" data-picker-pinned aria-hidden="true">
+      ${pickerOptions()}
+      <p class="picker-pinned__note">Applies to every quiz</p>
     </div>
 
     <nav class="jump" aria-label="Quiz categories">
@@ -132,12 +139,13 @@ export function renderHome(root) {
 
 /** The flag selection, shared with the play screen through localStorage. */
 async function wirePicker(root) {
-  const picker = root.querySelector('[data-picker]');
-  if (!picker) return;
+  const expanded = root.querySelector('[data-picker-expanded]');
+  const pinned = root.querySelector('[data-picker-pinned]');
+  if (!expanded || !pinned) return;
   const note = root.querySelector('[data-scope-note]');
 
   const paint = (id) => {
-    for (const button of picker.querySelectorAll('.picker__option')) {
+    for (const button of root.querySelectorAll('.picker__option')) {
       const on = button.dataset.scope === id;
       button.classList.toggle('is-selected', on);
       button.setAttribute('aria-checked', String(on));
@@ -147,39 +155,46 @@ async function wirePicker(root) {
 
   paint(readScope());
 
-  picker.addEventListener('click', (e) => {
-    const button = e.target.closest('.picker__option');
-    if (!button) return;
-    writeScope(button.dataset.scope);
-    paint(button.dataset.scope);
-  });
+  for (const host of [expanded, pinned]) {
+    host.addEventListener('click', (e) => {
+      const button = e.target.closest('.picker__option');
+      if (!button) return;
+      writeScope(button.dataset.scope);
+      paint(button.dataset.scope);
+    });
+  }
 
-  stickWhenScrolled(root);
+  showPinnedWhenScrolledPast(expanded, pinned);
 
   const counts = await scopeCounts();
   for (const [id, n] of Object.entries(counts)) {
-    const slot = root.querySelector(`[data-count="${id}"]`);
-    if (slot) slot.textContent = `${n} flags`;
+    for (const slot of root.querySelectorAll(`[data-count="${id}"]`)) {
+      slot.textContent = `${n} flags`;
+    }
   }
 }
 
 /**
- * The selection sticks under the masthead once you scroll past it, so it stays
- * obvious that it is one setting governing every quiz below rather than part
- * of the intro.
+ * The pinned copy appears exactly when the real one goes under the masthead.
  *
- * A sentinel above it decides when: once that scrolls out of view the bar is
- * pinned, and it compresses so it costs little height.
+ * The margin matters: without it the observer waits until the picker clears
+ * the top of the window, which is a whole masthead's worth of scrolling later,
+ * and in between the page shows neither copy.
  */
-function stickWhenScrolled(root) {
-  const sentinel = root.querySelector('[data-sentinel]');
-  const picker = root.querySelector('[data-picker-root]');
-  if (!sentinel || !picker || typeof IntersectionObserver !== 'function') return;
+function showPinnedWhenScrolledPast(expanded, pinned) {
+  if (typeof IntersectionObserver !== 'function') return;
+
+  const masthead = document.querySelector('.masthead');
+  const top = Math.round(masthead?.getBoundingClientRect().height ?? 53);
 
   new IntersectionObserver(
-    ([entry]) => picker.classList.toggle('is-stuck', !entry.isIntersecting),
-    { threshold: 0 }
-  ).observe(sentinel);
+    ([entry]) => {
+      const show = !entry.isIntersecting && entry.boundingClientRect.top < top;
+      pinned.classList.toggle('is-shown', show);
+      pinned.setAttribute('aria-hidden', String(!show));
+    },
+    { rootMargin: `-${top}px 0px 0px 0px`, threshold: 0 }
+  ).observe(expanded);
 }
 
 /** Card previews use real data, so each card demonstrates its own transform. */

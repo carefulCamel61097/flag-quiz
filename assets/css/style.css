@@ -164,7 +164,7 @@ button {
 /* -------------------------------------------------------------------- hero */
 
 .hero {
-  padding: clamp(1.5rem, 6vw, 4rem) 0 0;
+  padding: clamp(1.5rem, 6vw, 4rem) 0 clamp(1rem, 3vw, 2rem);
   max-width: 46rem;
 }
 
@@ -194,63 +194,9 @@ button {
 
 /* ------------------------------------------------------------------ picker */
 
-/* Marks where the bar sits in the flow; once this scrolls past the masthead
-   the bar is pinned. */
-.picker__sentinel {
-  height: 1px;
-}
-
-/* Sticky only works within the parent's box, so this is a direct child of the
-   page rather than of the intro block. */
-.picker__bar {
-  position: sticky;
-  top: var(--masthead);
-  z-index: 8;
+.picker {
   max-width: 46rem;
-  padding: 0.2rem 0;
-  border-radius: var(--radius-lg);
-  transition: padding 0.15s ease, background 0.15s ease;
-}
-
-.picker__bar.is-stuck {
-  padding: 0.5rem 0.75rem;
-  background: rgba(13, 16, 23, 0.9);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--line);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-/* Pinned, the heading and the stacked counts are wasted height: the
-   highlighted button already says what is selected. */
-.picker__bar.is-stuck .picker__title {
-  display: none;
-}
-.picker__bar.is-stuck .picker__option {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 0.4rem;
-  padding: 0.35rem 0.75rem;
-  min-height: 2.1rem;
-}
-.picker__bar.is-stuck .picker__label {
-  font-size: 0.87rem;
-}
-/* Counts belong to the expanded state. Pinned, they push the four options
-   onto a second line, which doubles the height of the bar. */
-.picker__bar.is-stuck .picker__count {
-  display: none;
-}
-.picker__bar.is-stuck .picker__options {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.picker__bar.is-stuck .picker__options::-webkit-scrollbar {
-  display: none;
-}
-.picker__bar.is-stuck .picker__option {
-  flex: none;
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
 }
 
 .picker__title {
@@ -305,27 +251,69 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-.picker__applies {
-  display: none;
-  margin: 0.45rem 0 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-.picker__bar.is-stuck .picker__applies {
-  display: block;
-}
-
-.picker__tail {
-  max-width: 46rem;
-  padding-bottom: clamp(2rem, 5vw, 3.5rem);
-}
-
 .picker__note {
   margin: 0.9rem 0 1.8rem;
   color: var(--text-dim);
   min-height: 1.5em;
+}
+
+/* ----------------------------------------------------------- pinned picker */
+
+/* Fixed, not sticky: it is outside the flow, so appearing and disappearing
+   moves nothing on the page and cannot feed back into its own trigger. */
+.picker-pinned {
+  position: fixed;
+  top: var(--masthead);
+  left: 50%;
+  z-index: 9;
+  width: min(calc(100vw - 2rem), 46rem);
+  transform: translate(-50%, -0.5rem);
+  padding: 0.55rem 0.75rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: rgba(13, 16, 23, 0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+}
+
+.picker-pinned.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+/* Compact: the counts and the heading are the expanded copy's job. */
+.picker-pinned .picker__options {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 0.4rem;
+}
+.picker-pinned .picker__options::-webkit-scrollbar {
+  display: none;
+}
+.picker-pinned .picker__option {
+  flex: none;
+  padding: 0.35rem 0.75rem;
+  min-height: 2.1rem;
+}
+.picker-pinned .picker__count {
+  display: none;
+}
+.picker-pinned .picker__label {
+  font-size: 0.87rem;
+  white-space: nowrap;
+}
+
+.picker-pinned__note {
+  margin: 0.4rem 0 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
 }
 
 /* ----------------------------------------------------------------- buttons */
@@ -580,15 +568,6 @@ button {
   letter-spacing: -0.015em;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
 .quiz__score {
   display: grid;
   justify-items: end;
@@ -762,6 +741,18 @@ button {
   gap: 1rem;
   margin-top: 1.4rem;
   min-height: 2.8rem;
+}
+
+/* The near-miss explanation, shown under the answer when a colour quiz is lost
+   by a shade rather than by a mile. */
+.tell {
+  margin: 0.9rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: rgba(255, 211, 77, 0.08);
+  color: var(--text);
+  font-size: 0.95rem;
 }
 
 .quiz__settings {
@@ -1085,24 +1076,6 @@ button {
     text-align: center;
   }
 
-  /* Pinned on a phone, a 2x2 block would eat a third of the screen. One row
-     that scrolls sideways keeps it to a single line. */
-  .picker__bar.is-stuck .picker__options {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    gap: 0.4rem;
-  }
-  .picker__bar.is-stuck .picker__options::-webkit-scrollbar {
-    display: none;
-  }
-  .picker__bar.is-stuck .picker__option {
-    flex: none;
-  }
-  .picker__bar.is-stuck .picker__count {
-    display: none;
-  }
 
   .upcoming__item {
     flex-direction: column;

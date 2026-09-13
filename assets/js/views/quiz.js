@@ -22,6 +22,7 @@ import {
 } from '../settings.js';
 import { buildRound, Round, verdictFor } from '../engine.js';
 import { buildIndex, suggest, judge, MIN_SUGGEST_CHARS } from '../matching.js';
+import { tellApart } from '../tells.js';
 
 /**
  * A pie as a single conic gradient: crisp at any size, no canvas, no library.
@@ -183,6 +184,7 @@ export async function renderQuiz(root, modeId) {
       </div>
 
       <div class="answer" data-answer></div>
+      <p class="tell" data-tell hidden></p>
 
       <div class="quiz__foot">
         <div class="quiz__settings">
@@ -205,6 +207,7 @@ export async function renderQuiz(root, modeId) {
     revealName: root.querySelector('[data-reveal-name]'),
     pie: root.querySelector('[data-pie]'),
     disc: root.querySelector('[data-disc]'),
+    tell: root.querySelector('[data-tell]'),
     crop: root.querySelector('[data-crop]'),
     cropImg: root.querySelector('[data-crop-img]'),
     figure: root.querySelector('.stage__figure'),
@@ -238,6 +241,27 @@ export async function renderQuiz(root, modeId) {
     el.track.style.width = `${(round.results.length / round.total) * 100}%`;
   }
 
+  /**
+   * In a colour mode a wrong answer is usually a near miss, and "wrong" on its
+   * own teaches nothing. If the two palettes are close, say which slice gave it
+   * away: that is the only thing that makes the near-identical pairs learnable.
+   */
+  function showTell(correct, named) {
+    el.tell.hidden = true;
+    if (correct || !named || mode.ambiguity !== 'palette' || !colourData) return;
+
+    const answer = round.question.answer;
+    const line = tellApart(
+      colourData.flags[answer.code],
+      colourData.flags[named.code],
+      answer.name,
+      named.name
+    );
+    if (!line) return;
+    el.tell.textContent = line;
+    el.tell.hidden = false;
+  }
+
   /** Shared ending for both answer modes. */
   function settle({ correct, named }) {
     const answer = round.question.answer;
@@ -258,6 +282,7 @@ export async function renderQuiz(root, modeId) {
     el.revealName.textContent = answer.name;
     el.reveal.hidden = false;
 
+    showTell(correct, named);
     paintMeters();
     el.next.hidden = false;
     el.next.textContent = round.finished ? 'See results' : 'Next';
@@ -455,6 +480,7 @@ export async function renderQuiz(root, modeId) {
     locked = false;
     el.figure.classList.remove('is-revealed', 'was-wrong');
     el.reveal.hidden = true;
+    el.tell.hidden = true;
     el.next.hidden = true;
     el.flag.src = flagUrl(round.question.answer);
 
