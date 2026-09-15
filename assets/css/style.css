@@ -769,6 +769,64 @@ button {
   border-color: var(--good);
 }
 
+/* Twin Flags: two flags, and the question of which is which. They are the
+   answer control as well as the picture, so they are buttons. */
+.pair__ask {
+  margin: 0 0 0.9rem;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pair__option {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  cursor: pointer;
+  transition: border-color 0.14s ease, transform 0.1s ease;
+}
+.pair__option:hover:not(:disabled) {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.pair__option:disabled {
+  cursor: default;
+}
+
+.pair__flag {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+}
+
+/* Empty until the reveal, but holding its height from the start so that
+   naming both flags does not shove the page around under the cursor. */
+.pair__name {
+  min-height: 1.4em;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.pair__option--correct {
+  border-color: var(--good);
+}
+.pair__option--wrong {
+  border-color: var(--bad);
+  opacity: 0.6;
+}
+
 /* ----------------------------------------------------------------- options */
 
 .options {

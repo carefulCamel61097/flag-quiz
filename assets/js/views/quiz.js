@@ -12,6 +12,7 @@ import {
   loadFakes,
   loadMosaics,
   loadFilterTwins,
+  loadLookalikes,
   scopeCounts,
   SCOPES,
 } from '../data.js';
@@ -34,6 +35,7 @@ const LOADERS = {
   fakes: loadFakes,
   mosaics: loadMosaics,
   filters: loadFilterTwins,
+  lookalikes: loadLookalikes,
 };
 
 /**
@@ -168,12 +170,14 @@ export async function renderQuiz(root, modeId) {
    * - "That is Kiribati" rather than "not a country we recognised".
    */
   const suggestIndex = buildIndex(pool);
-  const gradeIndex = buildIndex(await loadCountries());
+  const allCountries = await loadCountries();
+  const gradeIndex = buildIndex(allCountries);
+  const byCode = new Map(allCountries.map((c) => [c.code, c]));
 
   const round = new Round(buildRound(pool, { equivalentsOf }));
   let locked = false;
 
-  if (stage.prepareRound) await stage.prepareRound({ data, round, choice });
+  if (stage.prepareRound) await stage.prepareRound({ data, round, choice, byCode });
 
   const settings = (key, current, options) => `
     <label class="setting">
@@ -205,14 +209,20 @@ export async function renderQuiz(root, modeId) {
       <div class="quiz__track"><div class="quiz__track-fill" data-track></div></div>
 
       <div class="stage">
-        <figure class="stage__figure" style="--mode-filter:${mode.filter ?? 'none'}">
+        ${
+          // Twin Flags has two flags and no single one to reveal, so it takes
+          // the place of the figure rather than sitting inside it.
+          stage.replacesFigure
+            ? stage.markup
+            : `<figure class="stage__figure" style="--mode-filter:${mode.filter ?? 'none'}">
           ${stage.markup ?? ''}
           <img class="stage__flag" data-flag alt="The flag to identify">
           <figcaption class="stage__reveal" data-reveal hidden>
             <img class="stage__reveal-flag" data-reveal-flag alt="">
             <span data-reveal-name></span>
           </figcaption>
-        </figure>
+        </figure>`
+        }
       </div>
 
       <div class="answer" data-answer></div>
@@ -222,9 +232,9 @@ export async function renderQuiz(root, modeId) {
         <div class="quiz__settings">
           ${settings(SCOPE_KEY, scopeId, Object.values(SCOPES))}
           ${
-            // Real or Fake asks about the flag, not about the country, so
-            // "type it or pick it" is not a choice that exists here.
-            mode.answer === 'binary'
+            // Real or Fake asks about the flag and Twin Flags asks you to
+            // point at one, so "type it or pick it" is not a choice there.
+            mode.answer
               ? ''
               : settings(ANSWER_KEY, answerMode, Object.values(ANSWER_MODES))
           }
@@ -248,8 +258,13 @@ export async function renderQuiz(root, modeId) {
     figure: root.querySelector('.stage__figure'),
   };
 
-  /** The stage's own elements, looked up once rather than on every question. */
+  /**
+   * The stage's own elements, looked up once rather than on every question.
+   * `el.flag` is absent in Twin Flags, which has two; stages are handed a
+   * harmless stand-in so none of them has to know that.
+   */
   const own = stage.bind?.(root) ?? {};
+  if (!el.flag) el.flag = { style: {}, classList: { add() {}, remove() {} } };
 
   function paintMeters() {
     el.progress.textContent = `${round.results.length} / ${round.total}`;
@@ -273,11 +288,13 @@ export async function renderQuiz(root, modeId) {
     // be left on screen next to its name.
     stage.reveal?.({ own, el, data, choice, question: round.question, correct, round });
 
-    el.figure.classList.add('is-revealed');
-    el.figure.classList.toggle('was-wrong', !correct);
-    el.revealFlag.src = flagUrl(answer);
-    el.revealName.textContent = answer.name;
-    el.reveal.hidden = false;
+    if (el.figure) {
+      el.figure.classList.add('is-revealed');
+      el.figure.classList.toggle('was-wrong', !correct);
+      el.revealFlag.src = flagUrl(answer);
+      el.revealName.textContent = answer.name;
+      el.reveal.hidden = false;
+    }
 
     showTell(correct, named);
     paintMeters();
@@ -286,6 +303,30 @@ export async function renderQuiz(root, modeId) {
     el.next.focus();
 
     return named;
+  }
+
+  // ---------------------------------------------------------------- pair mode
+
+  /**
+   * Twin Flags answers by clicking one of the two flags, so the control is the
+   * stage rather than anything in the answer area. One listener, bound once:
+   * the buttons outlive every question.
+   */
+  function wirePair() {
+    own.buttons.forEach((button, side) => {
+      button.addEventListener('click', () => {
+        if (locked) return;
+        locked = true;
+        const { other, answerFirst } = round.question.pair;
+        const order = answerFirst
+          ? [round.question.answer, other]
+          : [other, round.question.answer];
+        const chosen = order[side];
+        const correct = chosen.code === round.question.answer.code;
+        round.answer(chosen, { correct });
+        settle({ correct, named: chosen });
+      });
+    });
   }
 
   // ------------------------------------------------------------- choose mode
@@ -514,16 +555,17 @@ export async function renderQuiz(root, modeId) {
 
   function paintQuestion() {
     locked = false;
-    el.figure.classList.remove('is-revealed', 'was-wrong');
-    el.reveal.hidden = true;
+    el.figure?.classList.remove('is-revealed', 'was-wrong');
+    if (el.reveal) el.reveal.hidden = true;
     el.tell.hidden = true;
     el.next.hidden = true;
-    el.flag.src = flagUrl(round.question.answer);
+    if (el.flag) el.flag.src = flagUrl(round.question.answer);
 
     stage.show({ own, el, data, choice, question: round.question });
 
     paintMeters();
-    if (mode.answer === 'binary') paintVerdict();
+    if (mode.answer === 'pair') el.answer.innerHTML = '';
+    else if (mode.answer === 'binary') paintVerdict();
     else if (answerMode === 'type') paintInput();
     else paintChoices();
   }
@@ -543,6 +585,7 @@ export async function renderQuiz(root, modeId) {
     }
   });
 
+  if (mode.answer === 'pair') wirePair();
   paintQuestion();
 }
 

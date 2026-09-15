@@ -167,8 +167,14 @@ export const MODES = [
     name: 'Twin Flags',
     category: 'compare',
     rank: 9,
-    status: 'soon',
+    status: 'live',
     blurb: 'Chad and Romania. Indonesia and Monaco. Which one is which?',
+    hint: 'The only quiz that shows you both. A shade of blue counts as evidence here.',
+    preview: 'ro',
+    // Two flags at once, so this one takes the place of the stage rather than
+    // filling it, and you answer by pointing at one.
+    stage: 'pair',
+    answer: 'pair',
   },
   {
     id: 'silhouette',

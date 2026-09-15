@@ -338,6 +338,76 @@ export const STAGES = {
     tell: ({ question }) => question.fake?.says ?? null,
   },
 
+  /**
+   * Two flags that get mistaken for each other, and the question of which is
+   * which. The only mode with more than one flag on screen, so it is the only
+   * one where the figure is replaced rather than filled.
+   */
+  pair: {
+    needs: ['lookalikes'],
+    replacesFigure: true,
+    markup: `
+      <p class="pair__ask" data-ask></p>
+      <div class="pair" data-pair>
+        ${[0, 1]
+          .map(
+            (side) => `
+        <button class="pair__option" type="button" data-side="${side}">
+          <img class="pair__flag" data-pair-flag="${side}" alt="One of two similar flags">
+          <span class="pair__name" data-pair-name="${side}"></span>
+        </button>`
+          )
+          .join('')}
+      </div>`,
+    bind: (root) => ({
+      ask: root.querySelector('[data-ask]'),
+      buttons: [...root.querySelectorAll('.pair__option')],
+      flags: [...root.querySelectorAll('[data-pair-flag]')],
+      names: [...root.querySelectorAll('[data-pair-name]')],
+    }),
+    /** Only flags that anybody actually confuses with something can be asked. */
+    prepare: ({ data, pool }) => pool.filter((c) => data.lookalikes.pairs[c.code]?.length),
+    /**
+     * The partner and the side are settled before the round rather than at
+     * paint time, so that what is graded and what is drawn cannot disagree.
+     */
+    prepareRound({ data, round, byCode }) {
+      for (const question of round.questions) {
+        const options = data.lookalikes.pairs[question.answer.code];
+        const other = byCode.get(pick(options).code);
+        question.pair = { other, answerFirst: Math.random() < 0.5 };
+      }
+    },
+    show({ own, el, question }) {
+      const { other, answerFirst } = question.pair;
+      const order = answerFirst ? [question.answer, other] : [other, question.answer];
+      own.ask.textContent = `Which one is ${question.answer.name}?`;
+      order.forEach((country, i) => {
+        own.flags[i].src = flagUrl(country);
+        own.names[i].textContent = '';
+        own.buttons[i].disabled = false;
+        own.buttons[i].classList.remove('pair__option--correct', 'pair__option--wrong');
+      });
+      el.flag.hidden = true;
+    },
+    /**
+     * Both names go up, not just the right one. Half of what makes these pairs
+     * hard is that the other flag is also a flag you half-know, and a reveal
+     * that names only one of them leaves the confusion exactly where it was.
+     */
+    reveal({ own, question }) {
+      const { other, answerFirst } = question.pair;
+      const order = answerFirst ? [question.answer, other] : [other, question.answer];
+      order.forEach((country, i) => {
+        own.names[i].textContent = country.name;
+        own.buttons[i].disabled = true;
+        own.buttons[i].classList.add(
+          country.code === question.answer.code ? 'pair__option--correct' : 'pair__option--wrong'
+        );
+      });
+    },
+  },
+
   reveal: {
     bind: (root) => ({ ticker: null }),
     /**

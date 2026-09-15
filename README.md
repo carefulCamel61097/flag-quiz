@@ -43,11 +43,11 @@ keeps a quiz worth replaying.
 
 | # | Mode | What the player sees | Appeal | Effort |
 | --- | --- | --- | --- | --- |
-| 8 | **Greyscale** | Layout intact, colour gone. Separates the flags you know by shape from the ones you know by colour. | Medium | Trivial |
-| 9 | **Twin flags** | Chad and Romania side by side, or Indonesia and Monaco. Which is which? | Medium–high | Low, once palette-collision data exists |
+| 8 | **Greyscale** | Layout intact, colour gone. Separates the flags you know by shape from the ones you know by colour. | Medium | Built |
+| 9 | **Twin flags** | Chad and Romania side by side, or Indonesia and Monaco. Which is which? | Medium–high | Built |
 | 10 | **Silhouette** | The emblem only, flattened to one colour on a plain field. Brutal, and great for the flags with coats of arms. | Medium | Medium — needs emblem isolation |
 | 11 | **Scrambled** | The flag cut into a grid and shuffled. | Medium | Low |
-| 12 | **Palette bar** | The colour-pie data as a stacked bar, which hides the "which slice is biggest" tell a pie gives away. | Medium | Trivial — the data and the twin handling already exist |
+| 12 | **Palette bar** | The colour-pie data as a stacked bar, shuffled so position says nothing and only the widths help. | Medium | Built |
 | 13 | **Polar** | The flag remapped into polar coordinates so it becomes a disc. Horizontal tricolours turn into concentric rings, vertical ones into wedges. Visually striking and it defamiliarises flags you would otherwise know instantly. | Medium | Low — about ten lines of canvas maths |
 
 ### Long tail and variations
@@ -57,7 +57,7 @@ curiosity rather than a headline mode.
 
 | Mode | What the player sees | Effort |
 | --- | --- | --- |
-| **Hue rotate** | Hue turned 180° but luminance preserved — a different puzzle from inversion. | Trivial |
+| **Hue Shift** | Hue turned 180° but luminance preserved — a different puzzle from inversion. | Built |
 | **Swatches only** | The flag's colours as unordered squares, proportions stripped out. | Trivial |
 | **One colour removed** | One colour knocked out to transparent. | Low |
 | **Single row** | One row of pixels stretched vertically. Trivial for horizontal tricolours, very hard for anything else. | Trivial |
@@ -133,7 +133,7 @@ hand-maintained synonym list.
 
 ```bash
 npm install
-npm run build        # prominence, flags, country data, colours, crops, fakes, mosaics
+npm run build        # everything below, in order
 ```
 
 [`scripts/build-flags.mjs`](scripts/build-flags.mjs) copies the 4:3 SVGs into
@@ -147,12 +147,17 @@ flag and writes `data/flag-colors.json`. It takes about two minutes, and needs
 `@resvg/resvg-js` — a build-time dependency only, never shipped to the
 browser.
 
-[`scripts/build-crops.mjs`](scripts/build-crops.mjs) chooses the Zoomed
-crops and [`scripts/build-fakes.mjs`](scripts/build-fakes.mjs) chooses the
-alterations for Real or Fake, and
-[`scripts/build-mosaics.mjs`](scripts/build-mosaics.mjs) chooses the block grid
-each flag is shown at in Mosaic. The first two depend on
-`data/flag-colors.json`, so they run after it.
+Then one script per mode that needs to know what its own transform destroys:
+
+| Script | Decides |
+| --- | --- |
+| [`build-crops.mjs`](scripts/build-crops.mjs) | which region of each flag Zoomed shows |
+| [`build-fakes.mjs`](scripts/build-fakes.mjs) | the alterations Real or Fake can make |
+| [`build-mosaics.mjs`](scripts/build-mosaics.mjs) | the block grid each flag is shown at |
+| [`build-filters.mjs`](scripts/build-filters.mjs) | which flags each CSS filter merges |
+| [`build-lookalikes.mjs`](scripts/build-lookalikes.mjs) | the pairs Twin Flags puts side by side |
+
+The first three depend on `data/flag-colors.json`, so they run after it.
 
 [`scripts/build-fame.mjs`](scripts/build-fame.mjs) is the only script that
 touches the network, and it skips itself when `data/fame.json` already exists.
@@ -265,8 +270,9 @@ What the quiz does with it:
 
 Each mode makes a different pair of flags identical, so each one says so in its
 own words: *makes the same pie as*, *blocks down to the same mosaic as*, *that
-patch looks the same on*, *flies the same flag as*. All four used to say "makes
-the same pie", including Classic, where no pie has been near the screen.
+patch looks the same on*, *with the colour taken out … is the same flag as*,
+*flies the same flag as*. They all used to say "makes the same pie", including
+Classic, where no pie has been near the screen.
 
 The same reasoning drives [crop selection](#how-the-zoom-crops-work) for the
 Zoomed quiz, where a crop that could belong to several flags accepts any of
@@ -475,6 +481,73 @@ The blur is set in pixels scaled to the width of the flag on screen — 5.5% of
 it — rather than as a fixed radius, so a phone and a desktop show the same
 puzzle rather than the phone showing an easier one. The sharpening is a single
 CSS transition; nothing is redrawn frame by frame.
+
+## What each filter destroys
+
+Greyscale and Hue Shift are one line of CSS each, which is the trap. A filter
+mode is only free if the filter is one-to-one, and whether it is has to be
+measured rather than assumed.
+
+| Filter | One-to-one? | Flags it merges |
+| --- | --- | --- |
+| `invert(1)` | yes | none — every colour maps to exactly one other colour |
+| `grayscale(1)` | no, it throws away two dimensions of three | 15 |
+| `hue-rotate(180deg)` | looks it, and is not quite | 8, all already near-identical |
+
+Greyscale merges the pairs you would expect once you look: Austria and the
+Netherlands are both a red band, a white band and a dark band. Cuba and Puerto
+Rico are the same flag with the blue and the red exchanged, which in grey is no
+exchange at all. Hungary and Luxembourg, Bangladesh and Morocco.
+
+Hue rotation deserves the check even though it passes it. The CSS filter is not
+an HSL rotation, whatever the name suggests — it is a fixed matrix applied in
+linear RGB, and its output is clamped to the 0-255 box, so colours pushed
+outside it land on the wall together. It happens not to collapse any flags that
+were not already near-identical, but that is a fact about these 250 flags, not
+a property of the filter.
+
+[`build-filters.mjs`](scripts/build-filters.mjs) applies each filter per pixel,
+reduces the result to a 12×9 grid of average colours, and records the pairs
+that come out within 70 of each other in every cell. Those accept each other as
+answers, and Greyscale says why: *"with the colour taken out, Monaco is the
+same flag as Indonesia"*.
+
+## How the twin pairs are chosen
+
+Twin Flags shows two flags and asks which is which, and it is the only analysis
+in the project that hunts for flags that are *nearly* the same rather than
+exactly the same. That flips both bars around.
+
+A pair has to be **close enough to be worth asking** — Egypt and Iraq, the
+British blue ensigns, Moldova and Romania, El Salvador and Nicaragua — and
+**far enough apart to have an answer**. Norway and Svalbard fly the same flag;
+"which one is Norway" has no answer and never will.
+
+Two things had to be got right.
+
+**The tell threshold is deliberately low.** The first run required the flags to
+differ somewhere by 110 and threw out Chad and Romania, and Indonesia and
+Monaco: the pairs the mode exists for, and the ones named in its own blurb.
+Everywhere else in this project a shade difference is worthless, because the
+player is comparing what they see against a memory — which is why the
+alteration build treats anything within 175 as the same colour. Twin Flags is
+the only mode that puts both flags on screen at once, so a difference of fifty
+is plain to see and counts as evidence. The bar now only has to exclude pairs
+with no visible difference at all.
+
+**Mirror images count.** Comparing cell against matching cell says Ireland and
+Côte d'Ivoire are nothing alike, which is true of the pixels and false of every
+person who has ever confused them. The same goes for Guinea and Mali, Italy and
+Mexico. Each pair is therefore scored twice, once directly and once against the
+mirrored flag, and the better reading decides whether they are confusable —
+while whether the question has an answer is judged on what is actually shown,
+which is never the mirrored version. Guinea and Mali come out the closest pair
+in the set, at 5.9.
+
+51 flags have at least one lookalike, which is the pool this mode draws from.
+Both flags are named on the reveal, not just the right one: half of what makes
+these pairs hard is that the other flag is also one you half-know, and naming
+only one of them leaves the confusion where it was.
 
 ## Which flags a quiz uses
 
@@ -693,12 +766,15 @@ assets/js/data.js             dataset loading and scopes
 assets/js/app.js              hash router
 assets/js/views/home.js       the hub
 assets/js/views/quiz.js       the play screen (shared by every mode)
+assets/js/stages.js           what each mode does to the flag  <-- one entry per mode
 assets/flags/4x3/*.svg        250 flags, generated
 data/countries.json           250 country records, generated
 data/flag-colors.json         measured palettes and palette twins, generated
 data/flag-crops.json          chosen crops and what each could also be, generated
 data/flag-fakes.json          verified alterations for Real or Fake, generated
 data/flag-mosaics.json        block grid per flag and what it shares, generated
+data/flag-filters.json        what each CSS filter merges, generated
+data/flag-lookalikes.json     pairs that get mistaken for each other, generated
 data/fame.json                Wikipedia and population snapshot, generated
 data/sources.json             upstream package versions
 scripts/build-fame.mjs        prominence snapshot (the only script that fetches)
@@ -707,6 +783,8 @@ scripts/build-colors.mjs      colour measurement and twin detection
 scripts/build-crops.mjs       crop selection and collision counting
 scripts/build-fakes.mjs       alteration selection and real-flag collision checks
 scripts/build-mosaics.mjs     block grids: coarse enough to hide, fine enough to answer
+scripts/build-filters.mjs     what greyscale and hue rotation destroy
+scripts/build-lookalikes.mjs  flag pairs that are nearly, but not quite, the same
 scripts/serve.mjs             local dev server, no dependencies
 ```
 
@@ -714,9 +792,10 @@ scripts/serve.mjs             local dev server, no dependencies
 
 Two ways to answer, switchable mid-round and remembered between visits.
 
-Real or Fake is the exception: it asks about the flag rather than about the
-country, so it has its own two-button answer and the type-or-choose setting is
-hidden while playing it.
+Two modes are exceptions, and neither asks you to name a country. Real or Fake
+asks about the flag on screen and answers with two buttons; Twin Flags asks you
+to point at one of two flags, and those flags are the control. The
+type-or-choose setting is hidden in both.
 
 **Type it** (the default) grades knowledge, not spelling. "Kyrgystan",
 "cote divoire" and "Holland" are all accepted; accents, case and punctuation
@@ -798,6 +877,12 @@ npm start        # http://localhost:4173
 - [x] Mosaic grid analysis into `data/flag-mosaics.json`
 - [x] Mode 5, mosaic
 - [x] Mode 6, blur reveal
+- [x] One place per mode instead of six: `assets/js/stages.js`
+- [x] Filter collision analysis into `data/flag-filters.json`
+- [x] Modes 8 and 14, greyscale and hue shift
+- [x] Mode 12, palette bar
+- [x] Lookalike analysis into `data/flag-lookalikes.json`
+- [x] Mode 9, twin flags
 - [ ] Somewhere to store play data, then measured difficulty
 - [ ] Difficulty weighting and palette-collision distractors
 - [ ] Strong follow-ups (modes 7-12)
