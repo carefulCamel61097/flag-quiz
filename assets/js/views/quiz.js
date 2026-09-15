@@ -22,95 +22,53 @@ import {
   readAnswerMode,
   writeSetting,
 } from '../settings.js';
-import { buildRound, Round, shuffle, verdictFor } from '../engine.js';
+import { buildRound, Round, verdictFor } from '../engine.js';
 import { buildIndex, suggest, judge, MIN_SUGGEST_CHARS } from '../matching.js';
-import { tellApart } from '../tells.js';
-import { recolourSvg } from '../svg-colour.js';
+import { stageFor, worthAt, WORTH_MAX } from '../stages.js';
 
-/** How an alteration that is only a reorientation is drawn. */
-const REORIENT = {
-  mirror: 'scaleX(-1)',
-  flip: 'scaleY(-1)',
-  rot180: 'scale(-1)',
+/** Where each data file comes from, so a stage can just name what it needs. */
+const LOADERS = {
+  colours: loadColours,
+  crops: loadCrops,
+  fakes: loadFakes,
+  mosaics: loadMosaics,
 };
 
 /**
- * A recoloured flag, as a URL an <img> can use.
+ * Which other countries count as the same answer, per mode.
  *
- * The alteration is a handful of colour substitutions, so the SVG is fetched
- * once and rewritten in memory rather than a second altered copy of all 250
- * flags being generated and shipped.
- */
-/**
- * How long Blur Reveal takes to come fully into focus, and what a question is
- * worth at either end of that.
+ * Kept apart from the stage because the two are not the same question. What
+ * the player sees and what counts as right usually travel together, but
+ * Greyscale is the plain flag with a filter over it and still needs its own
+ * equivalences, because stripping the colour out merges flags that differ only
+ * by it.
  *
- * The flag always sharpens all the way, so every question is answerable in the
- * end. What decays is the reward, which is what makes the mode a race against
- * your own certainty rather than a staring contest.
+ * `perFlag` means the answer depends on the exact crop or grid being shown,
+ * which the stage chose, rather than on the flag alone.
  */
-const REVEAL_MS = 14000;
-const WORTH_MAX = 100;
-const WORTH_MIN = 10;
-
-/** Starting blur, as a fraction of the flag's width, so phones match desktops. */
-const BLUR_SHARE = 0.055;
-
-const worthAt = (elapsedMs) =>
-  Math.max(
-    WORTH_MIN,
-    Math.round(WORTH_MAX - (Math.min(elapsedMs, REVEAL_MS) / REVEAL_MS) * (WORTH_MAX - WORTH_MIN))
-  );
-
-/**
- * Why a second country counts as a right answer here.
- *
- * Every mode hides something different, so every mode makes a different pair
- * of flags identical. Saying "makes the same pie" in Classic - where the two
- * are simply the same flag - was both wrong and confusing, since no pie has
- * been anywhere near the screen.
- */
-const SHARED_BECAUSE = {
-  palette: (named, answer) => `${named} makes the same pie as ${answer}.`,
-  crop: (named, answer) => `that patch of ${answer} looks the same on ${named}.`,
-  mosaic: (named, answer) => `${named} blocks down to the same mosaic as ${answer}.`,
-  same: (named, answer) => `${named} flies the same flag as ${answer}.`,
+const AMBIGUITIES = {
+  same: {
+    of: ({ country }) => country.sameFlagAs ?? [],
+    says: (named, answer) => `${named} flies the same flag as ${answer}.`,
+  },
+  palette: {
+    needs: 'colours',
+    of: ({ data, country }) => data.colours.twins[country.code] ?? [],
+    says: (named, answer) => `${named} makes the same pie as ${answer}.`,
+  },
+  crop: {
+    needs: 'crops',
+    perFlag: true,
+    of: ({ choice, country }) => choice.get(country.code)?.with ?? [],
+    says: (named, answer) => `that patch of ${answer} looks the same on ${named}.`,
+  },
+  mosaic: {
+    needs: 'mosaics',
+    perFlag: true,
+    of: ({ choice, country }) => choice.get(country.code)?.with ?? [],
+    says: (named, answer) => `${named} blocks down to the same mosaic as ${answer}.`,
+  },
 };
-
-/** One mosaic block per three characters; "..." is outside the flag (Nepal). */
-function mosaicBlocks(packed) {
-  let html = '';
-  for (let i = 0; i < packed.length; i += 3) {
-    const code = packed.slice(i, i + 3);
-    html += code === '...' ? '<i></i>' : `<i style="background:#${code}"></i>`;
-  }
-  return html;
-}
-
-const svgSource = new Map();
-async function recolouredFlag(country, swap) {
-  if (!svgSource.has(country.code)) {
-    const res = await fetch(flagUrl(country));
-    if (!res.ok) throw new Error(`Could not load ${country.name}'s flag`);
-    svgSource.set(country.code, await res.text());
-  }
-  const svg = recolourSvg(svgSource.get(country.code), swap);
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-}
-
-/**
- * A pie as a single conic gradient: crisp at any size, no canvas, no library.
- * Starts at twelve o'clock, biggest slice first.
- */
-function pieGradient(colours) {
-  let at = 0;
-  const stops = colours.map((c) => {
-    const from = at * 100;
-    at += c.share;
-    return `${c.hex} ${from.toFixed(3)}% ${(at * 100).toFixed(3)}%`;
-  });
-  return `conic-gradient(from -90deg, ${stops.join(', ')})`;
-}
 
 const escapeHtml = (s) =>
   String(s).replace(
@@ -146,19 +104,17 @@ export async function renderQuiz(root, modeId) {
     return;
   }
 
-  const needsColours = mode.stage === 'pie' || mode.ambiguity === 'palette';
-  const needsCrops = mode.stage === 'crop' || mode.ambiguity === 'crop';
-  const needsFakes = mode.stage === 'altered';
-  const needsMosaics = mode.stage === 'mosaic' || mode.ambiguity === 'mosaic';
-  let colourData = null;
-  let cropData = null;
-  let fakeData = null;
-  let mosaicData = null;
+  const stage = stageFor(mode);
+  const ambiguity = AMBIGUITIES[mode.ambiguity ?? 'same'] ?? AMBIGUITIES.same;
+
+  const data = {};
   try {
-    if (needsColours) colourData = await loadColours();
-    if (needsCrops) cropData = await loadCrops();
-    if (needsFakes) fakeData = await loadFakes();
-    if (needsMosaics) mosaicData = await loadMosaics();
+    const wanted = new Set([...(stage.needs ?? []), ambiguity.needs].filter(Boolean));
+    await Promise.all(
+      [...wanted].map(async (key) => {
+        data[key] = await LOADERS[key]();
+      })
+    );
   } catch (err) {
     root.innerHTML = `
       <section class="panel panel--centred">
@@ -169,54 +125,14 @@ export async function renderQuiz(root, modeId) {
   }
 
   /**
-   * One crop per flag, drawn before the round is built because the crop is
-   * what decides which other flags count as the same answer.
-   *
-   * Two flags have no usable crop at all: Indonesia and Poland are plain
-   * bicolours, and every region of them looks like a region of half a dozen
-   * other flags. They drop out of this mode rather than being asked as a
-   * question with no answer.
+   * Whatever the stage has to decide per flag before the round exists - which
+   * crop, which grid - because that decision is what settles the equivalences.
+   * A stage may also drop flags it cannot ask about at all.
    */
-  const crops = new Map();
-  if (needsCrops) {
-    for (const country of pool) {
-      const list = cropData.crops[country.code];
-      if (list?.length) crops.set(country.code, list[Math.floor(Math.random() * list.length)]);
-    }
-    pool = pool.filter((c) => crops.has(c.code));
-  }
+  const choice = new Map();
+  if (stage.prepare) pool = stage.prepare({ data, pool, choice });
 
-  /**
-   * Which other countries count as the same answer here.
-   *
-   * In a colour mode that is every flag with the same palette; everywhere else
-   * it is only the flags that are literally identical, like France and its
-   * overseas territories.
-   */
-  /**
-   * One mosaic per flag, drawn before the round like the crops and for the
-   * same reason: the grid decides which other flags count as the same answer.
-   * Two are stored per flag, a coarse one and a finer one, so the same flag is
-   * not the same question twice.
-   */
-  const mosaics = new Map();
-  if (needsMosaics) {
-    for (const country of pool) {
-      const list = mosaicData.mosaics[country.code];
-      if (list?.length) mosaics.set(country.code, list[Math.floor(Math.random() * list.length)]);
-    }
-    pool = pool.filter((c) => mosaics.has(c.code));
-  }
-
-  const equivalentsOf = (country) => {
-    if (mode.ambiguity === 'palette') return colourData.twins[country.code] ?? [];
-    // Whatever is indistinguishable at the grid this flag is being shown at.
-    if (mode.ambiguity === 'mosaic') return mosaics.get(country.code)?.with ?? [];
-    // A crop's equivalents are the flags that same region could belong to,
-    // which differs crop by crop rather than flag by flag.
-    if (mode.ambiguity === 'crop') return crops.get(country.code)?.with ?? [];
-    return country.sameFlagAs ?? [];
-  };
+  const equivalentsOf = (country) => ambiguity.of({ data, choice, country });
 
   /**
    * Two indexes, deliberately.
@@ -233,32 +149,7 @@ export async function renderQuiz(root, modeId) {
   const round = new Round(buildRound(pool, { equivalentsOf }));
   let locked = false;
 
-  /**
-   * Half the round is altered, near enough.
-   *
-   * Not exactly half, and never announced: a player who knows the split can
-   * count what they have seen and answer the last few without looking. Nine
-   * flags have no usable alteration at all - China, Poland and Somalia among
-   * them - so those are only ever shown genuine.
-   */
-  if (needsFakes) {
-    const target = Math.round(round.total / 2);
-    const alterable = shuffle(round.questions.filter((q) => fakeData.fakes[q.answer.code]));
-    for (const question of alterable.slice(0, target)) {
-      const list = fakeData.fakes[question.answer.code];
-      const fake = { ...list[Math.floor(Math.random() * list.length)] };
-      if (fake.kind === 'swap') {
-        // Fetched now rather than at the moment the question appears, so the
-        // genuine flag never flashes up before the altered one replaces it.
-        try {
-          fake.src = await recolouredFlag(question.answer, fake.swap);
-        } catch {
-          continue; // shown genuine instead; a missing file is not a question
-        }
-      }
-      question.fake = fake;
-    }
-  }
+  if (stage.prepareRound) await stage.prepareRound({ data, round, choice });
 
   const settings = (key, current, options) => `
     <label class="setting">
@@ -291,19 +182,7 @@ export async function renderQuiz(root, modeId) {
 
       <div class="stage">
         <figure class="stage__figure" style="--mode-filter:${mode.filter ?? 'none'}">
-          <div class="stage__pie" data-pie hidden>
-            <div class="stage__disc" data-disc role="img"
-                 aria-label="A pie chart of the flag's colours"></div>
-          </div>
-          <div class="stage__crop" data-crop hidden>
-            <div class="stage__crop-window">
-              <img class="stage__crop-img" data-crop-img alt="A zoomed-in part of a flag">
-            </div>
-          </div>
-          <div class="stage__mosaic" data-mosaic hidden>
-            <div class="mosaic" data-blocks role="img"
-                 aria-label="A flag reduced to coloured blocks"></div>
-          </div>
+          ${stage.markup ?? ''}
           <img class="stage__flag" data-flag alt="The flag to identify">
           <figcaption class="stage__reveal" data-reveal hidden>
             <img class="stage__reveal-flag" data-reveal-flag alt="">
@@ -340,70 +219,13 @@ export async function renderQuiz(root, modeId) {
     reveal: root.querySelector('[data-reveal]'),
     revealFlag: root.querySelector('[data-reveal-flag]'),
     revealName: root.querySelector('[data-reveal-name]'),
-    pie: root.querySelector('[data-pie]'),
-    disc: root.querySelector('[data-disc]'),
     tell: root.querySelector('[data-tell]'),
-    crop: root.querySelector('[data-crop]'),
-    cropImg: root.querySelector('[data-crop-img]'),
-    mosaic: root.querySelector('[data-mosaic]'),
-    blocks: root.querySelector('[data-blocks]'),
     worth: root.querySelector('[data-worth]'),
     figure: root.querySelector('.stage__figure'),
   };
 
-  /**
-   * Blur Reveal's clock. Two things run off it: the flag sharpening, which is
-   * a single CSS transition, and the counter showing what the question is
-   * still worth. Both are read from the same start time so they cannot drift.
-   */
-  let ticker = null;
-  const stopTicker = () => {
-    clearInterval(ticker);
-    ticker = null;
-  };
-
-  function startReveal() {
-    const width = el.figure.getBoundingClientRect().width || 640;
-    el.flag.style.transition = 'none';
-    el.flag.style.filter = `blur(${(width * BLUR_SHARE).toFixed(1)}px)`;
-    // Without reading back a layout value the browser coalesces both writes
-    // into one and the flag simply appears sharp.
-    void el.flag.offsetWidth;
-    el.flag.style.transition = `filter ${REVEAL_MS}ms linear`;
-    el.flag.style.filter = 'blur(0px)';
-
-    const started = performance.now();
-    const paint = () => {
-      // The view is rebuilt whenever a setting changes, orphaning this node.
-      if (!el.worth.isConnected) return stopTicker();
-      el.worth.textContent = `worth ${worthAt(performance.now() - started)}`;
-    };
-    el.worth.hidden = false;
-    paint();
-    stopTicker();
-    ticker = setInterval(paint, 200);
-  }
-
-  /**
-   * Shows one region of a flag, blown up to fill a square window.
-   *
-   * The flag stays an SVG in an oversized <img>, offset so the wanted region
-   * lands in the window. No canvas, and the zoom is vector-crisp at any scale.
-   *
-   * Crop coordinates are fractions: x and size of the flag's width, y of its
-   * height. The region is square on screen, so its height is size * 4/3 of the
-   * flag's height.
-   */
-  function showCrop(crop, src) {
-    if (!crop) return;
-    const zoom = 100 / crop.size; // image width, as a % of the window
-    el.cropImg.src = src;
-    el.cropImg.style.width = `${zoom}%`;
-    el.cropImg.style.left = `${-crop.x * zoom}%`;
-    // `top` is a percentage of the square window's height, and the image is
-    // 4:3, so its own height is three quarters of its width.
-    el.cropImg.style.top = `${-crop.y * zoom * 0.75}%`;
-  }
+  /** The stage's own elements, looked up once rather than on every question. */
+  const own = stage.bind?.(root) ?? {};
 
   function paintMeters() {
     el.progress.textContent = `${round.results.length} / ${round.total}`;
@@ -412,76 +234,21 @@ export async function renderQuiz(root, modeId) {
     el.track.style.width = `${(round.results.length / round.total) * 100}%`;
   }
 
-  /**
-   * In a colour mode a wrong answer is usually a near miss, and "wrong" on its
-   * own teaches nothing. If the two palettes are close, say which slice gave it
-   * away: that is the only thing that makes the near-identical pairs learnable.
-   */
+  /** Whatever this mode has to say after an answer, if anything. */
   function showTell(correct, named) {
-    el.tell.hidden = true;
-
-    /**
-     * In Real or Fake the alteration is always spelled out, whether the player
-     * got it or not: guessing "fake" correctly and not knowing what was wrong
-     * with it teaches nothing, and on a genuine flag the silence is the point.
-     */
-    if (mode.stage === 'altered') {
-      const fake = round.question.fake;
-      if (!fake) return;
-      el.tell.textContent = fake.says;
-      el.tell.hidden = false;
-      return;
-    }
-
-    if (correct || !named || mode.ambiguity !== 'palette' || !colourData) return;
-
-    const answer = round.question.answer;
-    const line = tellApart(
-      colourData.flags[answer.code],
-      colourData.flags[named.code],
-      answer.name,
-      named.name
-    );
-    if (!line) return;
-    el.tell.textContent = line;
-    el.tell.hidden = false;
+    const line = stage.tell?.({ data, question: round.question, correct, named });
+    el.tell.textContent = line ?? '';
+    el.tell.hidden = !line;
   }
 
   /** Shared ending for every answer mode. */
   function settle({ correct, named }) {
     const answer = round.question.answer;
-    const fake = round.question.fake;
 
-    // In pie mode the flag has been hidden all along; the reveal is the moment
-    // the chart turns back into the thing it was measured from.
-    if (mode.stage === 'pie') {
-      el.pie.hidden = true;
-      el.flag.hidden = false;
-    }
-    if (mode.stage === 'crop') {
-      el.crop.hidden = true;
-      el.flag.hidden = false;
-    }
-    if (mode.stage === 'mosaic') {
-      el.mosaic.hidden = true;
-      el.flag.hidden = false;
-    }
-    // Answering stops the clock: the flag snaps sharp and the counter freezes
-    // at what the answer was actually worth.
-    if (mode.stage === 'reveal') {
-      stopTicker();
-      el.flag.style.transition = '';
-      el.flag.style.filter = '';
-      const last = round.results.at(-1);
-      el.worth.textContent = correct ? `+${worthAt(last.elapsedMs)}` : 'missed';
-      el.worth.classList.toggle('is-scored', correct);
-    }
-    // The alteration comes off on the reveal. A flag un-flipping in place says
-    // what was wrong with it better than any sentence can.
-    if (mode.stage === 'altered') {
-      el.flag.style.transform = '';
-      el.flag.src = flagUrl(answer);
-    }
+    // Whatever the mode did to the flag, undo it: the real flag is what should
+    // be left on screen next to its name.
+    stage.reveal?.({ own, el, data, choice, question: round.question, correct, round });
+
     el.figure.classList.add('is-revealed');
     el.figure.classList.toggle('was-wrong', !correct);
     el.revealFlag.src = flagUrl(answer);
@@ -651,8 +418,10 @@ export async function renderQuiz(root, modeId) {
       form.querySelector('.typer__submit').hidden = true;
 
       if (viaTwin) {
-        const because = SHARED_BECAUSE[mode.ambiguity ?? 'same'] ?? SHARED_BECAUSE.same;
-        feedback.textContent = `Also accepted - ${because(verdict.named.name, answer.name)}`;
+        feedback.textContent = `Also accepted - ${ambiguity.says(
+          verdict.named.name,
+          answer.name
+        )}`;
         feedback.className = 'typer__feedback typer__feedback--ok';
         feedback.hidden = false;
       } else if (!correct) {
@@ -727,39 +496,7 @@ export async function renderQuiz(root, modeId) {
     el.next.hidden = true;
     el.flag.src = flagUrl(round.question.answer);
 
-    if (mode.stage === 'altered') {
-      const fake = round.question.fake;
-      // A reorientation is a CSS transform on the same file; a colour swap is
-      // a rewritten copy of the SVG, prepared when the round was built.
-      el.flag.style.transform = fake ? (REORIENT[fake.kind] ?? '') : '';
-      if (fake?.src) el.flag.src = fake.src;
-    }
-
-    if (mode.stage === 'pie') {
-      el.disc.style.background = pieGradient(colourData.flags[round.question.answer.code]);
-      el.pie.hidden = false;
-      el.flag.hidden = true;
-    }
-
-    if (mode.stage === 'crop') {
-      showCrop(crops.get(round.question.answer.code), flagUrl(round.question.answer));
-      el.crop.hidden = false;
-      el.flag.hidden = true;
-    }
-
-    if (mode.stage === 'mosaic') {
-      const grid = mosaics.get(round.question.answer.code);
-      el.blocks.style.setProperty('--gx', grid.gx);
-      el.blocks.style.setProperty('--gy', grid.gy);
-      el.blocks.innerHTML = mosaicBlocks(grid.cells);
-      el.mosaic.hidden = false;
-      el.flag.hidden = true;
-    }
-
-    if (mode.stage === 'reveal') {
-      el.worth.classList.remove('is-scored');
-      startReveal();
-    }
+    stage.show({ own, el, data, choice, question: round.question });
 
     paintMeters();
     if (mode.answer === 'binary') paintVerdict();
