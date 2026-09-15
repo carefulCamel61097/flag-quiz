@@ -13,6 +13,7 @@ import {
   loadMosaics,
   loadFilterTwins,
   loadLookalikes,
+  loadEmblems,
   scopeCounts,
   SCOPES,
 } from '../data.js';
@@ -36,6 +37,7 @@ const LOADERS = {
   mosaics: loadMosaics,
   filters: loadFilterTwins,
   lookalikes: loadLookalikes,
+  emblems: loadEmblems,
 };
 
 /**
@@ -85,6 +87,12 @@ const AMBIGUITIES = {
     perFlag: true,
     of: ({ choice, country }) => choice.get(country.code)?.with ?? [],
     says: (named, answer) => `${named} blocks down to the same mosaic as ${answer}.`,
+  },
+  silhouette: {
+    needs: 'emblems',
+    of: ({ data, country }) => data.emblems.emblems[country.code]?.with ?? [],
+    says: (named, answer) =>
+      `the emblem on ${named} is the same shape in the same place as on ${answer}.`,
   },
   greyscale: filterTwins(
     'greyscale',

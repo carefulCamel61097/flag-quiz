@@ -181,8 +181,14 @@ export const MODES = [
     name: 'Silhouette',
     category: 'detail',
     rank: 10,
-    status: 'soon',
+    status: 'live',
     blurb: 'The emblem alone, flattened to one colour on an empty field.',
+    hint: 'Where it sits on the flag is part of the answer. So is what is missing.',
+    preview: 'ca',
+    // The emblem is cut out of the flag's own SVG: see scripts/build-emblems.mjs
+    // for how the build decides which shapes are the charge and which the field.
+    stage: 'silhouette',
+    ambiguity: 'silhouette',
   },
   {
     id: 'scrambled',

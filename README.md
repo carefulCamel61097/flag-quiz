@@ -45,7 +45,7 @@ keeps a quiz worth replaying.
 | --- | --- | --- | --- | --- |
 | 8 | **Greyscale** | Layout intact, colour gone. Separates the flags you know by shape from the ones you know by colour. | Medium | Built |
 | 9 | **Twin flags** | Chad and Romania side by side, or Indonesia and Monaco. Which is which? | Medium–high | Built |
-| 10 | **Silhouette** | The emblem only, flattened to one colour on a plain field. Brutal, and great for the flags with coats of arms. | Medium | Medium — needs emblem isolation |
+| 10 | **Silhouette** | The emblem only, flattened to one colour on a plain field. Brutal, and great for the flags with coats of arms. | Medium | Built |
 | 11 | **Scrambled** | The flag cut into a grid and shuffled. | Medium | Low |
 | 12 | **Palette bar** | The colour-pie data as a stacked bar, shuffled so position says nothing and only the widths help. | Medium | Built |
 | 13 | **Polar** | The flag remapped into polar coordinates so it becomes a disc. Horizontal tricolours turn into concentric rings, vertical ones into wedges. Visually striking and it defamiliarises flags you would otherwise know instantly. | Medium | Low — about ten lines of canvas maths |
@@ -156,6 +156,7 @@ Then one script per mode that needs to know what its own transform destroys:
 | [`build-mosaics.mjs`](scripts/build-mosaics.mjs) | the block grid each flag is shown at |
 | [`build-filters.mjs`](scripts/build-filters.mjs) | which flags each CSS filter merges |
 | [`build-lookalikes.mjs`](scripts/build-lookalikes.mjs) | the pairs Twin Flags puts side by side |
+| [`build-emblems.mjs`](scripts/build-emblems.mjs) | which shapes in each flag are the emblem |
 
 The first three depend on `data/flag-colors.json`, so they run after it.
 
@@ -549,6 +550,72 @@ Both flags are named on the reveal, not just the right one: half of what makes
 these pairs hard is that the other flag is also one you half-know, and naming
 only one of them leaves the confusion where it was.
 
+## Pulling the emblem off the flag
+
+Silhouette needs the maple leaf without Canada and the eagle without Mexico,
+which sounds like an image-segmentation problem. It is not one, because these
+are not images. Every flag here is an SVG, so the leaf is already a separate
+object in the file — it just has a field drawn behind it. The question is only
+which objects are the field and which are the charge, and one rule settles it
+almost every time:
+
+> **the field reaches the edge of the flag, and an emblem does not.**
+
+Canada's two red bars reach it, the leaf does not. Denmark's cross runs to all
+four edges, so Denmark has no emblem and drops out of the mode — which is the
+right answer, not a failure. "Edge" means the edge of the *flag*, not of the
+canvas: Nepal is not a rectangle, and measured against the canvas border its
+crimson field would look like a floating shape rather than the field it is.
+
+That found an emblem in **134 of 250 flags**, and the data is 9KB, because what
+is stored is not a picture. It is a list of element indices. The site cuts the
+emblem out of the flag SVG it already has and paints it one colour, the same
+trick Real or Fake uses for its colour swaps, so nothing extra is ever shipped.
+
+### One render per flag, not one per element
+
+The obvious way to ask "where does this element land" is to render it on its
+own. That cost 600ms an element — resvg's time is nearly all per-call overhead
+rather than per pixel — and Spain has 542 elements. The first build ran for
+twenty minutes without finishing a quarter of the corpus.
+
+So instead every element is painted a colour that encodes its own index, the
+flag is rendered **once**, and the colour of a pixel says which element put it
+there. Three minutes for all 250.
+
+### Canada needed a second idea
+
+Canada draws its two red bars *and* its maple leaf as subpaths of a single
+`<path>`. Element-level analysis asks "does this element reach the edge", gets
+a yes, and loses the leaf.
+
+The fix is to ask the question of each connected *region* instead of each
+element: both bars reach the edge, the leaf does not. Then the element is kept
+but cut down to the box the leaf sits in, with an SVG `clipPath` — so the leaf
+still comes out as vector rather than as a traced bitmap.
+
+This is a fallback and not the default, which matters. Applying it everywhere
+broke Mexico: its eagle is 300 elements and 700 regions, and clipping to 700
+rectangles both bloated the file and leaked slivers of the field back in. An
+element whose every region is interior is kept whole. Only three flags need the
+clip.
+
+### What it refuses to ship
+
+Every candidate is cut the way the site will cut it, rendered, and compared
+against what the analysis measured. Anything below 97% agreement is dropped.
+That catches the two structures this approach cannot read:
+
+- **The United States** draws its fifty stars with an SVG `<marker>`, so the
+  stars belong to no element at all and cannot be selected.
+- **Kenya, Argentina, Albania and Montenegro** build their charges out of
+  `<use>` references into `<defs>`, and keeping a subset of elements breaks the
+  references.
+
+31 flags are dropped this way, on top of the 75 that genuinely have no charge.
+Losing the United States from this mode is a real loss and the honest one:
+better absent than shipped as a broken picture.
+
 ## Which flags a quiz uses
 
 Four selections, chosen on the home page before you start and carried into
@@ -762,6 +829,7 @@ assets/js/engine.js           rounds, distractors, scoring (mode-agnostic)
 assets/js/matching.js         free-text grading and type-ahead suggestions
 assets/js/tells.js            why two near-identical palettes are not the same
 assets/js/svg-colour.js       reading and rewriting flag colours (shared with the build)
+assets/js/svg-slice.js        taking a flag apart into the shapes it is drawn from
 assets/js/data.js             dataset loading and scopes
 assets/js/app.js              hash router
 assets/js/views/home.js       the hub
@@ -775,6 +843,7 @@ data/flag-fakes.json          verified alterations for Real or Fake, generated
 data/flag-mosaics.json        block grid per flag and what it shares, generated
 data/flag-filters.json        what each CSS filter merges, generated
 data/flag-lookalikes.json     pairs that get mistaken for each other, generated
+data/flag-emblems.json        which shapes in each flag are the emblem, generated
 data/fame.json                Wikipedia and population snapshot, generated
 data/sources.json             upstream package versions
 scripts/build-fame.mjs        prominence snapshot (the only script that fetches)
@@ -785,6 +854,7 @@ scripts/build-fakes.mjs       alteration selection and real-flag collision check
 scripts/build-mosaics.mjs     block grids: coarse enough to hide, fine enough to answer
 scripts/build-filters.mjs     what greyscale and hue rotation destroy
 scripts/build-lookalikes.mjs  flag pairs that are nearly, but not quite, the same
+scripts/build-emblems.mjs     telling a flag's charge from its field
 scripts/serve.mjs             local dev server, no dependencies
 ```
 
@@ -883,6 +953,8 @@ npm start        # http://localhost:4173
 - [x] Mode 12, palette bar
 - [x] Lookalike analysis into `data/flag-lookalikes.json`
 - [x] Mode 9, twin flags
+- [x] Emblem isolation into `data/flag-emblems.json`
+- [x] Mode 10, silhouette
 - [ ] Somewhere to store play data, then measured difficulty
 - [ ] Difficulty weighting and palette-collision distractors
 - [ ] Strong follow-ups (modes 7-12)

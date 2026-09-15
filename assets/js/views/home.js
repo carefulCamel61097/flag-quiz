@@ -3,7 +3,16 @@
  * mode that does not exist or miss one that does.
  */
 import { CATEGORIES, MODES, modesInCategory, liveModes } from '../registry.js';
-import { loadCountries, loadColours, loadMosaics, flagUrl, SCOPES, scopeCounts } from '../data.js';
+import {
+  loadCountries,
+  loadColours,
+  loadMosaics,
+  loadEmblems,
+  flagUrl,
+  SCOPES,
+  scopeCounts,
+} from '../data.js';
+import { silhouetteUrl } from '../stages.js';
 import { readScope, writeScope } from '../settings.js';
 
 const FALLBACK_PREVIEW = 'br';
@@ -16,6 +25,10 @@ function modeCard(mode) {
   if (mode.stage === 'pie') {
     preview = `<div class="card__preview card__preview--pie">
                  <div class="pie" data-pie-preview="${code}"></div>
+               </div>`;
+  } else if (mode.stage === 'silhouette') {
+    preview = `<div class="card__preview card__preview--emblem">
+                 <img alt="" aria-hidden="true" data-emblem-preview="${code}">
                </div>`;
   } else if (mode.stage === 'bar') {
     preview = `<div class="card__preview card__preview--bar">
@@ -217,6 +230,7 @@ async function fillPreviews(root) {
   const pieSlots = [...root.querySelectorAll('[data-pie-preview]')];
   const barSlots = [...root.querySelectorAll('[data-bar-preview]')];
   const mosaicSlots = [...root.querySelectorAll('[data-mosaic-preview]')];
+  const emblemSlots = [...root.querySelectorAll('[data-emblem-preview]')];
 
   if (flagSlots.length) {
     const byCode = new Map((await loadCountries()).map((c) => [c.code, c]));
@@ -249,6 +263,16 @@ async function fillPreviews(root) {
         return `${c.hex} ${from.toFixed(3)}% ${(at * 100).toFixed(3)}%`;
       });
       slot.style.background = `conic-gradient(from -90deg, ${stops.join(', ')})`;
+    }
+  }
+
+  if (emblemSlots.length) {
+    const { emblems } = await loadEmblems();
+    const byCode = new Map((await loadCountries()).map((c) => [c.code, c]));
+    for (const img of emblemSlots) {
+      const country = byCode.get(img.dataset.emblemPreview);
+      const cut = emblems[img.dataset.emblemPreview];
+      if (country && cut) img.src = await silhouetteUrl(country, cut);
     }
   }
 

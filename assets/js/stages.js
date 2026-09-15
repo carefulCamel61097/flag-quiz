@@ -25,6 +25,7 @@
  */
 import { flagUrl } from './data.js';
 import { recolourSvg } from './svg-colour.js';
+import { sliceSvg } from './svg-slice.js';
 import { shuffle } from './engine.js';
 import { tellApart } from './tells.js';
 
@@ -91,15 +92,21 @@ const REORIENT = {
  * flags being generated and shipped.
  */
 const svgSource = new Map();
-async function recolouredFlag(country, swap) {
+
+/** A flag's SVG text, fetched once. Two modes rewrite it before showing it. */
+async function flagSvg(country) {
   if (!svgSource.has(country.code)) {
     const res = await fetch(flagUrl(country));
     if (!res.ok) throw new Error(`Could not load ${country.name}'s flag`);
     svgSource.set(country.code, await res.text());
   }
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    recolourSvg(svgSource.get(country.code), swap)
-  )}`;
+  return svgSource.get(country.code);
+}
+
+const asUrl = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+
+async function recolouredFlag(country, swap) {
+  return asUrl(recolourSvg(await flagSvg(country), swap));
 }
 
 // ------------------------------------------------------------- blur reveal
@@ -126,6 +133,37 @@ export const worthAt = (elapsedMs) =>
       WORTH_MAX - (Math.min(elapsedMs, REVEAL_MS) / REVEAL_MS) * (WORTH_MAX - WORTH_MIN)
     )
   );
+
+// ------------------------------------------------------------- silhouette
+
+/** One flat colour, light against the dark stage. */
+const SILHOUETTE = '#eef2f8';
+
+/** `[[4, 299]]` back into indices. Mexico's eagle is three hundred paths. */
+const expandRanges = (list) => {
+  const out = [];
+  for (const [from, to] of list) {
+    for (let i = from; i <= to; i++) out.push(i);
+  }
+  return out;
+};
+
+/**
+ * A flag's emblem, cut out of the flag and painted one colour, as a URL an
+ * <img> can use. Shared with the home page, which previews it on a card.
+ */
+export async function silhouetteUrl(country, cut) {
+  return asUrl(
+    sliceSvg(await flagSvg(country), {
+      into: cut.into ?? [],
+      keep: expandRanges(cut.keep),
+      // Canada's bars and its maple leaf are one path, so the leaf only comes
+      // out on its own if the shape is cut down to the box it sits in.
+      clip: cut.clip ?? null,
+      colour: SILHOUETTE,
+    })
+  );
+}
 
 /**
  * Why a near miss was a near miss, for the modes that show nothing but the
@@ -336,6 +374,54 @@ export const STAGES = {
      * nothing, and on a genuine flag the silence is the point.
      */
     tell: ({ question }) => question.fake?.says ?? null,
+  },
+
+  /**
+   * The emblem with the flag taken out from under it.
+   *
+   * Nothing is generated for this: the build worked out which elements of each
+   * flag are the charge, and the site cuts them out of the SVG it already has
+   * and paints them one colour. See scripts/build-emblems.mjs for how those
+   * elements are identified.
+   */
+  silhouette: {
+    needs: ['emblems'],
+    markup: `
+      <div class="stage__emblem" data-emblem hidden>
+        <img class="stage__emblem-img" data-emblem-img
+             alt="The emblem from a flag, as a plain silhouette">
+      </div>`,
+    bind: (root) => ({
+      emblem: root.querySelector('[data-emblem]'),
+      img: root.querySelector('[data-emblem-img]'),
+    }),
+    /** Flags with no emblem at all - Denmark, the UK - cannot be asked here. */
+    prepare: ({ data, pool }) => pool.filter((c) => data.emblems.emblems[c.code]),
+    /**
+     * Cut before the round starts rather than as each question appears, so the
+     * whole flag never flashes up before the silhouette replaces it.
+     */
+    async prepareRound({ data, round, choice }) {
+      for (const question of round.questions) {
+        try {
+          const cut = data.emblems.emblems[question.answer.code];
+          choice.set(question.answer.code, await silhouetteUrl(question.answer, cut));
+        } catch {
+          /* left out; the stage falls back to showing nothing for this one */
+        }
+      }
+    },
+    show({ own, el, choice, question }) {
+      const src = choice.get(question.answer.code);
+      if (!src) return;
+      own.img.src = src;
+      own.emblem.hidden = false;
+      el.flag.hidden = true;
+    },
+    reveal({ own, el }) {
+      own.emblem.hidden = true;
+      el.flag.hidden = false;
+    },
   },
 
   /**

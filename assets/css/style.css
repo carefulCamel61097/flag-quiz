@@ -445,6 +445,17 @@ button {
   overflow: hidden;
 }
 
+.card__preview--emblem {
+  display: grid;
+  place-items: center;
+  background: var(--bg-sunken);
+}
+.card__preview--emblem img {
+  width: 88%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+}
+
 .card__preview--bar {
   display: grid;
   place-items: center;
@@ -666,6 +677,22 @@ button {
   position: absolute;
   max-width: none;
   display: block;
+}
+
+/* The emblem on its own. Padded in from the frame so a charge that sits near
+   the edge of the flag does not sit against the edge of the stage. */
+.stage__emblem {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: var(--bg-sunken);
+}
+
+.stage__emblem-img {
+  width: 92%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
 }
 
 /* The palette as one stacked bar. Flex-grow carries the shares, so the widths

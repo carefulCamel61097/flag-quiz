@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "build": "npm run build:fame && npm run build:flags && npm run build:colors && npm run build:crops && npm run build:fakes && npm run build:mosaics && npm run build:filters && npm run build:lookalikes",
+    "build": "npm run build:fame && npm run build:flags && npm run build:colors && npm run build:crops && npm run build:fakes && npm run build:mosaics && npm run build:filters && npm run build:lookalikes && npm run build:emblems",
     "build:fame": "node scripts/build-fame.mjs",
     "build:flags": "node scripts/build-flags.mjs",
     "build:colors": "node scripts/build-colors.mjs",
@@ -14,7 +14,8 @@
     "build:fakes": "node scripts/build-fakes.mjs",
     "build:mosaics": "node scripts/build-mosaics.mjs",
     "build:filters": "node scripts/build-filters.mjs",
-    "build:lookalikes": "node scripts/build-lookalikes.mjs"
+    "build:lookalikes": "node scripts/build-lookalikes.mjs",
+    "build:emblems": "node scripts/build-emblems.mjs"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
