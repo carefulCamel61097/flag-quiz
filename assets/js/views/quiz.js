@@ -11,6 +11,7 @@ import {
   loadCrops,
   loadFakes,
   loadMosaics,
+  loadFilterTwins,
   scopeCounts,
   SCOPES,
 } from '../data.js';
@@ -32,7 +33,22 @@ const LOADERS = {
   crops: loadCrops,
   fakes: loadFakes,
   mosaics: loadMosaics,
+  filters: loadFilterTwins,
 };
+
+/**
+ * A filter mode's equivalences, which differ by filter.
+ *
+ * Greyscale merges fifteen flags - Austria with the Netherlands, Cuba with
+ * Puerto Rico, Hungary with Luxembourg - because it throws two of the three
+ * colour dimensions away. Hue Shift merges almost nothing, which the build
+ * measures rather than assumes.
+ */
+const filterTwins = (key, says) => ({
+  needs: 'filters',
+  of: ({ data, country }) => data.filters.filters[key]?.twins[country.code] ?? [],
+  says,
+});
 
 /**
  * Which other countries count as the same answer, per mode.
@@ -68,6 +84,14 @@ const AMBIGUITIES = {
     of: ({ choice, country }) => choice.get(country.code)?.with ?? [],
     says: (named, answer) => `${named} blocks down to the same mosaic as ${answer}.`,
   },
+  greyscale: filterTwins(
+    'greyscale',
+    (named, answer) => `with the colour taken out, ${named} is the same flag as ${answer}.`
+  ),
+  'hue-rotate': filterTwins(
+    'hue-rotate',
+    (named, answer) => `${named} turns the same colours as ${answer} does.`
+  ),
 };
 
 const escapeHtml = (s) =>

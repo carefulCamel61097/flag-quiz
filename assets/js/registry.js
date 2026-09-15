@@ -153,9 +153,14 @@ export const MODES = [
     name: 'Greyscale',
     category: 'colour',
     rank: 8,
-    status: 'soon',
+    status: 'live',
     blurb: 'Layout intact, colour gone. Do you know it by shape or by colour?',
+    hint: 'Fifteen flags lose the thing that told them apart. Those accept each other.',
+    preview: 'br',
     filter: 'grayscale(1)',
+    // Unlike inverting, turning a flag grey destroys information: Austria and
+    // the Netherlands come out the same flag.
+    ambiguity: 'greyscale',
   },
   {
     id: 'twins',
@@ -202,9 +207,14 @@ export const MODES = [
     name: 'Hue Shift',
     category: 'colour',
     rank: 14,
-    status: 'soon',
+    status: 'live',
     blurb: 'Hue turned halfway round the wheel, brightness untouched.',
+    hint: 'Nothing is hidden, only moved. Red goes cyan-ish, green goes violet.',
+    preview: 'br',
     filter: 'hue-rotate(180deg)',
+    // Near enough one-to-one, but the build measures that rather than assuming
+    // it: the CSS filter is a matrix whose output is clamped.
+    ambiguity: 'hue-rotate',
   },
   {
     id: 'swatches',
