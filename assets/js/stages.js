@@ -127,6 +127,24 @@ export const worthAt = (elapsedMs) =>
     )
   );
 
+/**
+ * Why a near miss was a near miss, for the modes that show nothing but the
+ * palette.
+ *
+ * A wrong answer there is usually close, and "wrong" on its own teaches
+ * nothing. Saying which slice gave it away - a deeper blue, a wider stripe -
+ * is what makes the near-identical pairs learnable at all.
+ */
+const paletteTell = ({ data, question, correct, named }) => {
+  if (correct || !named) return null;
+  return tellApart(
+    data.colours.flags[question.answer.code],
+    data.colours.flags[named.code],
+    question.answer.name,
+    named.name
+  );
+};
+
 // ------------------------------------------------------------------- stages
 
 export const STAGES = {
@@ -157,20 +175,42 @@ export const STAGES = {
       own.pie.hidden = true;
       el.flag.hidden = false;
     },
-    /**
-     * A wrong answer in a colour mode is usually a near miss, and "wrong" on
-     * its own teaches nothing. If the two palettes are close, say which slice
-     * gave it away: that is what makes the near-identical pairs learnable.
-     */
-    tell({ data, question, correct, named }) {
-      if (correct || !named) return null;
-      return tellApart(
-        data.colours.flags[question.answer.code],
-        data.colours.flags[named.code],
-        question.answer.name,
-        named.name
-      );
+    tell: paletteTell,
+  },
+
+  /**
+   * The same measured palette as the pie, as one stacked bar.
+   *
+   * Two things make it a different question rather than the same one drawn
+   * differently. A bar is linear, so the proportions can actually be compared
+   * by eye instead of estimated as angles. And the segments are shuffled,
+   * where the pie always runs biggest-first from twelve o'clock - so position
+   * tells you nothing and only width is left to go on.
+   */
+  bar: {
+    needs: ['colours'],
+    markup: `
+      <div class="stage__bar" data-bar hidden>
+        <div class="bar" data-bar-track role="img"
+             aria-label="The flag's colours as a stacked bar"></div>
+      </div>`,
+    bind: (root) => ({
+      bar: root.querySelector('[data-bar]'),
+      track: root.querySelector('[data-bar-track]'),
+    }),
+    show({ own, el, data, question }) {
+      const colours = shuffle(data.colours.flags[question.answer.code]);
+      own.track.innerHTML = colours
+        .map((c) => `<i style="background:${c.hex};flex-grow:${c.share.toFixed(5)}"></i>`)
+        .join('');
+      own.bar.hidden = false;
+      el.flag.hidden = true;
     },
+    reveal({ own, el }) {
+      own.bar.hidden = true;
+      el.flag.hidden = false;
+    },
+    tell: paletteTell,
   },
 
   crop: {

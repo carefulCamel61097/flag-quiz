@@ -445,6 +445,16 @@ button {
   overflow: hidden;
 }
 
+.card__preview--bar {
+  display: grid;
+  place-items: center;
+  background: var(--bg-sunken);
+}
+.card__preview--bar .bar {
+  width: 84%;
+  height: 40%;
+}
+
 .card__preview--mosaic .mosaic {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -656,6 +666,34 @@ button {
   position: absolute;
   max-width: none;
   display: block;
+}
+
+/* The palette as one stacked bar. Flex-grow carries the shares, so the widths
+   are exact and nothing has to be worked out in percentages. */
+.stage__bar {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: var(--bg-sunken);
+}
+
+.bar {
+  display: flex;
+  width: 86%;
+  /* Deliberately short. At half the height of the stage a two-colour bar just
+     looks like a bicolour flag, which is the one thing it must not read as. */
+  height: 26%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  /* Without a ring a black segment is invisible against the dark stage, the
+     same problem the pie has. */
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28);
+}
+
+.bar i {
+  display: block;
+  flex-basis: 0;
 }
 
 /* The mosaic: the measured blocks as a plain CSS grid. No canvas, no image,

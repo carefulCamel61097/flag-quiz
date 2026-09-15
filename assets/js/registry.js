@@ -191,8 +191,13 @@ export const MODES = [
     name: 'Palette Bar',
     category: 'colour',
     rank: 12,
-    status: 'soon',
-    blurb: 'The same colours as one stacked bar, with the biggest-slice tell removed.',
+    status: 'live',
+    blurb: 'The same colours as one stacked bar, shuffled so only the widths help.',
+    hint: 'Order is random here. The pie always runs biggest first; this does not.',
+    preview: 'za',
+    // Same measured palette as the pie, so the same flags make the same bar.
+    stage: 'bar',
+    ambiguity: 'palette',
   },
   {
     id: 'polar',

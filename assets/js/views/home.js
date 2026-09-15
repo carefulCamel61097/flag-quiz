@@ -17,6 +17,10 @@ function modeCard(mode) {
     preview = `<div class="card__preview card__preview--pie">
                  <div class="pie" data-pie-preview="${code}"></div>
                </div>`;
+  } else if (mode.stage === 'bar') {
+    preview = `<div class="card__preview card__preview--bar">
+                 <div class="bar" data-bar-preview="${code}"></div>
+               </div>`;
   } else if (mode.stage === 'mosaic') {
     preview = `<div class="card__preview card__preview--mosaic">
                  <div class="mosaic" data-mosaic-preview="${code}"></div>
@@ -211,6 +215,7 @@ function showPinnedWhenScrolledPast(expanded, pinned) {
 async function fillPreviews(root) {
   const flagSlots = [...root.querySelectorAll('[data-preview]')];
   const pieSlots = [...root.querySelectorAll('[data-pie-preview]')];
+  const barSlots = [...root.querySelectorAll('[data-bar-preview]')];
   const mosaicSlots = [...root.querySelectorAll('[data-mosaic-preview]')];
 
   if (flagSlots.length) {
@@ -218,6 +223,17 @@ async function fillPreviews(root) {
     for (const img of flagSlots) {
       const country = byCode.get(img.dataset.preview);
       if (country) img.src = flagUrl(country);
+    }
+  }
+
+  if (barSlots.length) {
+    const { flags } = await loadColours();
+    for (const slot of barSlots) {
+      const colours = flags[slot.dataset.barPreview];
+      if (!colours) continue;
+      slot.innerHTML = colours
+        .map((c) => `<i style="background:${c.hex};flex-grow:${c.share.toFixed(5)}"></i>`)
+        .join('');
     }
   }
 
